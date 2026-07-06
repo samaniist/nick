@@ -68,12 +68,7 @@ const TREND = Array.from({ length: 18 }, (_, i) => ({
 const TREND_LINE = TREND.map((p) => `${p.x},${p.y.toFixed(1)}`).join(" ");
 const TREND_AREA = `M${TREND[0].x},640 L${TREND_LINE.replaceAll(" ", " L")} L${TREND[TREND.length - 1].x},640 Z`;
 
-const PRICES: [string, number][] = [
-  ["117.23", 104],
-  ["103.39", 252],
-  ["89.54", 400],
-  ["75.70", 548],
-];
+const GRID_YS = [104, 252, 400, 548];
 
 export default function Hero() {
   return (
@@ -98,8 +93,8 @@ export default function Hero() {
               <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
             </linearGradient>
           </defs>
-          {PRICES.map(([, y]) => (
-            <line key={y} x1={16} x2={744} y1={y} y2={y} stroke="#ffffff" strokeOpacity={0.07} />
+          {GRID_YS.map((y) => (
+            <line key={y} x1={16} x2={804} y1={y} y2={y} stroke="#ffffff" strokeOpacity={0.07} />
           ))}
           {CANDLES.map((c, i) => (
             <g key={i}>
@@ -147,19 +142,6 @@ export default function Hero() {
             fill="#ffffff"
             fillOpacity={0.9}
           />
-          {PRICES.map(([label, y]) => (
-            <text
-              key={label}
-              x={812}
-              y={y + 4}
-              textAnchor="end"
-              fill="#8f8f98"
-              fontSize={14}
-              className="font-mono"
-            >
-              {label}
-            </text>
-          ))}
         </svg>
         <KeyboardBall />
       </div>
