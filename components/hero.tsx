@@ -1,0 +1,127 @@
+import Image from "next/image";
+
+import KeyboardBall from "@/components/keyboard-ball";
+
+const navLinks = [
+  { label: "Home", href: "#", dropdown: false },
+  { label: "Services", href: "#", dropdown: true },
+  { label: "E-Commerce", href: "#", dropdown: true },
+];
+
+function ChevronDown() {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      className="h-4 w-4"
+      aria-hidden="true"
+    >
+      <path d="m4 6 4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+/* Client logos, all rendered as flat light-gray marks on transparent
+   backgrounds via brightness-0 invert. */
+const clients = [
+  { name: "PHM Connect", src: "/clients/phm.png", width: 500, height: 500, size: "h-13" },
+  { name: "Mondzorg Haveneiland", src: "/clients/haveneiland.png", width: 800, height: 200, size: "h-10" },
+  { name: "Fiberglasdiscount", src: "/clients/fiberglasdiscount.svg", width: 990, height: 199, size: "h-8" },
+  { name: "Mondzorgpraktijk Veenendaal", src: "/clients/veenendaal.png", width: 347, height: 60, size: "h-8" },
+  { name: "Smoke Gigant", src: "/clients/smoke-gigant.png", width: 180, height: 50, size: "h-8" },
+  { name: "Onelogy", src: "/clients/onelogy.png", width: 400, height: 82, size: "h-7" },
+  { name: "Atlantis Integrative Medicine & Psychiatry", src: "/clients/atlantis.png", width: 2992, height: 620, size: "h-9" },
+];
+
+export default function Hero() {
+  return (
+    // sticky: the next section slides up over the hero on scroll
+    <section className="sticky top-0 flex min-h-svh flex-col overflow-hidden bg-black font-sans text-white">
+      {/* keycap ball on the right third; keys type themselves and react to the pointer */}
+      <div className="absolute inset-y-0 right-[5%] hidden w-1/3 items-center justify-center lg:flex">
+        <KeyboardBall />
+      </div>
+
+      <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
+        <div className="flex items-center gap-12">
+          <a href="#" aria-label="Nexlytic home">
+            <Image
+              src="/logo.png"
+              alt="Nexlytic"
+              width={652}
+              height={325}
+              priority
+              className="h-9 w-auto brightness-0 invert"
+            />
+          </a>
+          <nav aria-label="Main" className="hidden items-center gap-9 md:flex">
+            {navLinks.map((link) => (
+              <a
+                key={link.label}
+                href={link.href}
+                className="flex items-center gap-1.5 text-[15px] text-white transition-colors hover:text-zinc-300"
+              >
+                {link.label}
+                {link.dropdown && <ChevronDown />}
+              </a>
+            ))}
+          </nav>
+        </div>
+        <div className="flex items-center gap-7">
+          <a
+            href="#"
+            className="rounded-[3px] bg-white px-5 py-2.5 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
+          >
+            Book Free Call
+          </a>
+          <a
+            href="#"
+            className="hidden text-[15px] text-white transition-colors hover:text-zinc-300 sm:block"
+          >
+            Contact
+          </a>
+        </div>
+      </header>
+
+      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 sm:px-10 lg:px-14">
+        <h1 className="max-w-4xl text-[44px] font-medium leading-[1.08] tracking-[-0.02em] sm:text-6xl lg:text-[72px]">
+          Built for <span className="text-zinc-400">Growth.</span>
+          <br />
+          Driven by <span className="text-zinc-400">Data.</span>
+        </h1>
+        <p className="mt-6 max-w-lg text-base leading-relaxed text-zinc-300 sm:text-lg">
+          Your digital growth agency — web design, SEO and performance
+          marketing built for measurable, long-term success.
+        </p>
+        <div className="mt-8">
+          <a
+            href="#"
+            className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
+          >
+            Book Free Call
+          </a>
+        </div>
+      </div>
+
+      <div className="relative z-10 flex flex-wrap items-center gap-x-12 gap-y-5 px-6 pb-12 sm:px-10 lg:px-14">
+        <span className="text-[17px] font-semibold">Trusted By:</span>
+        <ul className="flex flex-wrap items-center gap-x-10 gap-y-6">
+          {clients.map((c) => (
+            <li key={c.name}>
+              <Image
+                src={c.src}
+                alt={c.name}
+                width={c.width}
+                height={c.height}
+                unoptimized={c.src.endsWith(".svg")}
+                className={`${c.size} w-auto max-w-none brightness-0 invert opacity-55 transition-opacity duration-300 hover:opacity-90`}
+              />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}

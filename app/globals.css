@@ -22,5 +22,139 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+/* Chart entrance animations (components/who-we-are.tsx) */
+@keyframes viz-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes viz-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes viz-pulse {
+  0% {
+    r: 5;
+    opacity: 0.45;
+  }
+  70% {
+    r: 15;
+    opacity: 0;
+  }
+  100% {
+    r: 15;
+    opacity: 0;
+  }
+}
+
+@keyframes viz-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.viz-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: viz-draw 1100ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+@keyframes viz-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.viz-rise {
+  opacity: 0;
+  animation: viz-rise 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.viz-drop {
+  opacity: 0;
+  animation: viz-drop 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes viz-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+.viz-float {
+  animation: viz-float 6s ease-in-out infinite;
+}
+
+.viz-pulse {
+  animation: viz-pulse 2.2s cubic-bezier(0.33, 1, 0.68, 1) infinite;
+}
+
+.viz-fade {
+  opacity: 0;
+  animation: viz-fade 700ms ease-out forwards;
+}
+
+/* Endless slow marquee (components/growth-partner.tsx). The row holds two
+   identical copies; sliding -50% (one copy) then restarting is seamless. */
+@keyframes gp-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.gp-marquee {
+  animation: gp-marquee 45s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gp-marquee {
+    animation: none;
+  }
+}
+
+/* Keycap press for the hero keyboard ball (components/keyboard-ball.tsx).
+   The face travels along its local Z, i.e. into the sphere. */
+.gk-face {
+  transform: translateZ(0);
+  transition:
+    transform 200ms cubic-bezier(0.34, 0.7, 0.34, 1),
+    filter 200ms ease;
+}
+
+.gk-key:hover .gk-face,
+.gk-face.gk-down {
+  transform: translateZ(-28px);
+  filter: brightness(0.8);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gk-face {
+    transition: none;
+  }
 }
