@@ -25,6 +25,123 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* White neon on the hero keywords (components/hero.tsx). The .hero-glow
+   wash behind the headline spreads the same light faintly over the section. */
+.hero-neon {
+  color: #fff;
+  text-shadow:
+    0 0 7px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(255, 255, 255, 0.42),
+    0 0 48px rgba(255, 255, 255, 0.26),
+    0 0 100px rgba(255, 255, 255, 0.16);
+  animation: hero-neon-breathe 5s ease-in-out infinite;
+}
+
+@keyframes hero-neon-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.88;
+  }
+}
+
+/* White neon lamp behind the hero keyboard ball (components/hero.tsx).
+   Bright core just past the ball's edge, then a long soft falloff so the
+   light is felt across the section. Breathes slowly like a real neon. */
+.ball-backlight {
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.34) 0%,
+    rgba(255, 255, 255, 0.18) 34%,
+    rgba(255, 255, 255, 0.07) 52%,
+    rgba(255, 255, 255, 0.025) 66%,
+    transparent 78%
+  );
+  animation: ball-backlight-breathe 6s ease-in-out infinite;
+}
+
+@keyframes ball-backlight-breathe {
+  0%,
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.82;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ball-backlight {
+    animation: none;
+  }
+}
+
+/* Coin ring orbiting the keyboard ball (components/keyboard-ball.tsx).
+   The ring is tilted like a planet's ring; the spinner rotates in the ring
+   plane while each coin face plays the exact inverse rotation so it always
+   billboards toward the viewer. Both animations must share one duration. */
+.coin-ring {
+  transform: rotateZ(-14deg) rotateX(68deg);
+}
+
+.coin-ring-spin {
+  animation: coin-orbit 22s linear infinite;
+}
+
+@keyframes coin-orbit {
+  from {
+    transform: rotateZ(0deg);
+  }
+  to {
+    transform: rotateZ(360deg);
+  }
+}
+
+.coin {
+  color: #fff;
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 0.9),
+    0 0 14px rgba(255, 255, 255, 0.6),
+    0 0 30px rgba(255, 255, 255, 0.35);
+  animation: coin-billboard 22s linear infinite;
+}
+
+@keyframes coin-billboard {
+  from {
+    transform: rotateZ(calc(var(--coin-a) * -1)) rotateX(-68deg) rotateZ(14deg);
+  }
+  to {
+    transform: rotateZ(calc(var(--coin-a) * -1 - 360deg)) rotateX(-68deg) rotateZ(14deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coin-ring-spin,
+  .coin {
+    animation-play-state: paused;
+  }
+}
+
+.hero-glow {
+  background: radial-gradient(
+    ellipse 55% 45% at 28% 52%,
+    rgba(255, 255, 255, 0.09),
+    rgba(255, 255, 255, 0.035) 45%,
+    transparent 70%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-neon {
+    animation: none;
+  }
+}
+
 /* Chart entrance animations (components/who-we-are.tsx) */
 @keyframes viz-draw {
   to {
@@ -142,9 +259,47 @@ body {
    The face travels along its local Z, i.e. into the sphere. */
 .gk-face {
   transform: translateZ(0);
+  /* hard white-neon legends, like a backlit gaming keyboard */
+  text-shadow:
+    0 0 4px rgba(255, 255, 255, 1),
+    0 0 12px rgba(255, 255, 255, 0.9),
+    0 0 26px rgba(255, 255, 255, 0.65),
+    0 0 50px rgba(255, 255, 255, 0.4);
   transition:
     transform 200ms cubic-bezier(0.34, 0.7, 0.34, 1),
     filter 200ms ease;
+}
+
+/* icon legends can't use text-shadow; glow them the same way */
+.gk-face svg {
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 1))
+    drop-shadow(0 0 16px rgba(255, 255, 255, 0.6));
+}
+
+/* Hero H1 snaps out of the dark background on first load. */
+.hero-title {
+  opacity: 0;
+  animation: hero-title-emerge 2.2s cubic-bezier(0.35, 0.4, 0.3, 1) forwards;
+}
+
+@keyframes hero-title-emerge {
+  from {
+    opacity: 0;
+    filter: brightness(0.2) blur(6px);
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    filter: brightness(1) blur(0);
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title {
+    opacity: 1;
+    animation: none;
+  }
 }
 
 .gk-key:hover .gk-face,

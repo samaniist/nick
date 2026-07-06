@@ -88,10 +88,16 @@ const KEYS: (React.ReactNode | null)[] = [
   null,
 ];
 
+/* Coins orbiting the ball on a tilted ring; each face counter-rotates
+   (see .coin keyframes) so the symbol keeps facing the viewer. */
+const COINS = ["$", "€", "$", "$", "€", "$", "€", "$", "$", "€", "$", "€"];
+const RING_R = 395; // orbit radius in px, clear of the keycaps
+
 /* One uniform MacBook-style charcoal cap: soft top highlight, chunky
-   extruded sides like an old mechanical keycap, deep drop shadow. */
+   extruded sides like an old mechanical keycap, deep drop shadow. The
+   legends glow white-neon via .gk-face rules in globals.css. */
 const CAP =
-  "border-white/10 bg-linear-to-b from-[#2c2c31] via-[#1d1d21] to-[#141417] text-zinc-200 " +
+  "border-white/10 bg-linear-to-b from-[#2c2c31] via-[#1d1d21] to-[#141417] text-white " +
   "shadow-[inset_0_1px_0_rgba(255,255,255,0.16),inset_0_-5px_8px_rgba(0,0,0,0.45),0_7px_0_#0b0b0c,0_14px_0_#060607,0_28px_44px_rgba(0,0,0,0.72)]";
 
 /**
@@ -153,6 +159,31 @@ export default function KeyboardBall() {
   return (
     <div className="scale-[0.78] [perspective:1300px] xl:scale-100">
       <div ref={tiltRef} className="will-change-transform [transform-style:preserve-3d]">
+        {/* orbiting dollar/euro coins */}
+        <div
+          aria-hidden
+          className="coin-ring absolute left-1/2 top-1/2 [transform-style:preserve-3d]"
+        >
+          <div className="coin-ring-spin [transform-style:preserve-3d]">
+            {COINS.map((sym, i) => {
+              const a = (360 / COINS.length) * i;
+              return (
+                <div
+                  key={i}
+                  className="absolute [transform-style:preserve-3d]"
+                  style={{ transform: `rotate(${a}deg) translateX(${RING_R}px)` }}
+                >
+                  <div
+                    className="coin -ml-7 -mt-7 flex h-14 w-14 items-center justify-center text-4xl font-semibold"
+                    style={{ "--coin-a": `${a}deg` } as React.CSSProperties}
+                  >
+                    {sym}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
         <div
           ref={ballRef}
           className="viz-float relative h-[560px] w-[560px] [transform-style:preserve-3d] motion-reduce:animate-none"
