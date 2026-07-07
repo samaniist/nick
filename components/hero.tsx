@@ -108,10 +108,11 @@ export default function Hero() {
       {/* keycap ball: in the flow below the copy on mobile/tablet, pinned to
           the right third on desktop; keys type themselves and react to the pointer */}
       <div className="relative flex h-[300px] items-center justify-center sm:h-[460px] lg:absolute lg:inset-y-0 lg:right-[9%] lg:h-auto lg:w-1/3">
-        {/* white neon lamp behind the ball; its light washes over the hero */}
+        {/* white neon lamp behind the ball (desktop only); on mobile the
+            headline's own neon wash is enough light */}
         <div
           aria-hidden
-          className="ball-backlight absolute left-1/2 top-1/2 h-[420px] w-[420px] rounded-full lg:h-[760px] lg:w-[760px]"
+          className="ball-backlight absolute left-1/2 top-1/2 hidden h-[760px] w-[760px] rounded-full lg:block"
         />
         <KeyboardBall />
       </div>
@@ -125,21 +126,21 @@ export default function Hero() {
           className="overflow-hidden sm:hidden"
           style={{
             maskImage:
-              "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+              "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
             WebkitMaskImage:
-              "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+              "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
           }}
         >
           <ul className="gp-marquee flex w-max items-center">
             {[...clients, ...clients].map((c, i) => (
-              <li key={`${c.name}-${i}`} className="mr-10" aria-hidden={i >= clients.length}>
+              <li key={`${c.name}-${i}`} className="mr-8" aria-hidden={i >= clients.length}>
                 <Image
                   src={c.src}
                   alt={i < clients.length ? c.name : ""}
                   width={c.width}
                   height={c.height}
                   unoptimized={c.src.endsWith(".svg")}
-                  className={`${c.size} w-auto max-w-none brightness-0 invert opacity-55`}
+                  className="h-6 w-auto max-w-none brightness-0 invert opacity-55"
                 />
               </li>
             ))}
