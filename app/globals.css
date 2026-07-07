@@ -25,6 +25,15 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Nexlytic logo everywhere on dark surfaces: forced white (the source PNG is
+   dark) plus the same white-neon halo as the hero keywords. Replaces the
+   Tailwind brightness-0 invert pair, which would collide with this filter. */
+.logo-neon {
+  filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255, 255, 255, 0.65))
+    drop-shadow(0 0 14px rgba(255, 255, 255, 0.35))
+    drop-shadow(0 0 32px rgba(255, 255, 255, 0.18));
+}
+
 /* White neon on the hero keywords (components/hero.tsx). The .hero-glow
    wash behind the headline spreads the same light faintly over the section. */
 .hero-neon {

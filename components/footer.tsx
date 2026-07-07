@@ -170,7 +170,7 @@ export default function Footer() {
               alt="Nexlytic"
               width={652}
               height={325}
-              className="h-9 w-auto brightness-0 invert"
+              className="logo-neon h-9 w-auto"
             />
             <p className="mt-6 max-w-xs text-[15px] leading-relaxed text-zinc-400">
               Your digital agency for measurable growth and sustainable results.

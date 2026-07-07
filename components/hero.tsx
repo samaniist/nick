@@ -51,7 +51,7 @@ export default function Hero() {
               width={652}
               height={325}
               priority
-              className="h-9 w-auto brightness-0 invert"
+              className="logo-neon h-9 w-auto"
             />
           </a>
           <nav aria-label="Main" className="hidden items-center gap-9 md:flex">
