@@ -157,7 +157,7 @@ export default function KeyboardBall() {
   }, []);
 
   return (
-    <div className="scale-[0.78] [perspective:1300px] xl:scale-100">
+    <div className="scale-[0.42] [perspective:1300px] sm:scale-[0.62] lg:scale-[0.78] xl:scale-100">
       <div ref={tiltRef} className="will-change-transform [transform-style:preserve-3d]">
         {/* orbiting dollar/euro coins */}
         <div

@@ -39,16 +39,6 @@ export default function Hero() {
   return (
     // sticky: the next section slides up over the hero on scroll
     <section className="sticky top-0 flex min-h-svh flex-col overflow-hidden bg-black font-sans text-white">
-      {/* keycap ball on the right third; keys type themselves and react to the pointer */}
-      <div className="absolute inset-y-0 right-[9%] hidden w-1/3 items-center justify-center lg:flex">
-        {/* white neon lamp behind the ball; its light washes over the hero */}
-        <div
-          aria-hidden
-          className="ball-backlight absolute left-1/2 top-1/2 h-[760px] w-[760px] rounded-full"
-        />
-        <KeyboardBall />
-      </div>
-
       {/* faint wash of the keyword neon over the whole section */}
       <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
 
@@ -115,9 +105,49 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="relative z-10 flex flex-wrap items-center gap-x-12 gap-y-5 px-6 pb-12 sm:px-10 lg:px-14">
+      {/* keycap ball: in the flow below the copy on mobile/tablet, pinned to
+          the right third on desktop; keys type themselves and react to the pointer */}
+      <div className="relative flex h-[300px] items-center justify-center sm:h-[460px] lg:absolute lg:inset-y-0 lg:right-[9%] lg:h-auto lg:w-1/3">
+        {/* white neon lamp behind the ball; its light washes over the hero */}
+        <div
+          aria-hidden
+          className="ball-backlight absolute left-1/2 top-1/2 h-[420px] w-[420px] rounded-full lg:h-[760px] lg:w-[760px]"
+        />
+        <KeyboardBall />
+      </div>
+
+      <div className="relative z-10 flex flex-col gap-y-4 px-6 pb-12 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-12 sm:gap-y-5 sm:px-10 lg:px-14">
         <span className="text-[17px] font-semibold">Trusted By:</span>
-        <ul className="flex flex-wrap items-center gap-x-10 gap-y-6">
+
+        {/* mobile: one endless sliding row (same seamless two-copy marquee as
+            the growth-partner strip), edges faded out with a mask */}
+        <div
+          className="overflow-hidden sm:hidden"
+          style={{
+            maskImage:
+              "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent, black 12%, black 88%, transparent)",
+          }}
+        >
+          <ul className="gp-marquee flex w-max items-center">
+            {[...clients, ...clients].map((c, i) => (
+              <li key={`${c.name}-${i}`} className="mr-10" aria-hidden={i >= clients.length}>
+                <Image
+                  src={c.src}
+                  alt={i < clients.length ? c.name : ""}
+                  width={c.width}
+                  height={c.height}
+                  unoptimized={c.src.endsWith(".svg")}
+                  className={`${c.size} w-auto max-w-none brightness-0 invert opacity-55`}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* tablet/desktop: the wrapping list as before */}
+        <ul className="hidden flex-wrap items-center gap-x-10 gap-y-6 sm:flex">
           {clients.map((c) => (
             <li key={c.name}>
               <Image
