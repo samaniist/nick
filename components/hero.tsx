@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 import KeyboardBall from "@/components/keyboard-ball";
 
@@ -74,12 +75,12 @@ export default function Hero() {
           >
             Book Free Call
           </a>
-          <a
-            href="#"
+          <Link
+            href="/contact"
             className="hidden text-[15px] text-white transition-colors hover:text-zinc-300 sm:block"
           >
             Contact
-          </a>
+          </Link>
         </div>
       </header>
 
