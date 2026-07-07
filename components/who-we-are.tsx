@@ -588,7 +588,10 @@ export default function WhoWeAre() {
           </div>
 
           <div className="mt-4 grid gap-4 lg:grid-cols-12">
-            <div className="flex flex-col gap-4 lg:col-span-5">
+            {/* min-w-0: let the tracks shrink below the table's min width on
+                phones so the table scrolls inside its card instead of
+                stretching the page */}
+            <div className="flex min-w-0 flex-col gap-4 lg:col-span-5">
               <Rise inView={inView} delay={480}>
                 <Card title="Revenue" subtitle={period.label}>
                   <RevenueChart data={period.revenue} periodKey={periodKey} inView={inView} />
@@ -634,7 +637,7 @@ export default function WhoWeAre() {
               </Rise>
             </div>
 
-            <Rise inView={inView} delay={640} className="lg:col-span-7">
+            <Rise inView={inView} delay={640} className="min-w-0 lg:col-span-7">
               <Card title="Statistics" subtitle={period.label} className="flex h-full flex-col">
                 <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Toggle series">
                   {SERIES.map((s) => {
