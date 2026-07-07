@@ -79,7 +79,16 @@ function EuropeMap({ inView }: { inView: boolean }) {
         const r = e.currentTarget.getBoundingClientRect();
         setPos({ x: e.clientX - r.left, y: e.clientY - r.top });
       }}
-      onPointerLeave={() => setCountry(null)}
+      /* capture phase: runs before the country path's own handler, so a tap
+         on a country clears-then-sets while a tap on the sea just clears */
+      onPointerDownCapture={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        setPos({ x: e.clientX - r.left, y: e.clientY - r.top });
+        setCountry(null);
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse") setCountry(null);
+      }}
     >
       <svg
         viewBox={EU_MAP_VIEWBOX}
@@ -104,6 +113,7 @@ function EuropeMap({ inView }: { inView: boolean }) {
                 animationDelay: `${200 + i * 25}ms`,
               }}
               onPointerEnter={() => setCountry(c.name)}
+              onPointerDown={() => setCountry(c.name)}
             >
               <title>{c.name}</title>
             </path>

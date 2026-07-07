@@ -305,7 +305,11 @@ export default function WhyNexlytic() {
             const on = active === i;
             return (
               <Rise key={s.no} inView={inView} delay={160 + i * 90}>
-                <li className="relative pl-16" onPointerEnter={() => setActive(i)}>
+                <li
+                  className="relative pl-16"
+                  onPointerEnter={() => setActive(i)}
+                  onClick={() => setActive(i)}
+                >
                   {i < STEPS.length - 1 && (
                     <span
                       className="absolute left-[21px] top-12 -bottom-10 w-px bg-zinc-200"

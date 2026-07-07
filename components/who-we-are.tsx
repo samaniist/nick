@@ -273,12 +273,16 @@ function RevenueChart({ data, periodKey, inView }: { data: number[]; periodKey: 
     <div className="relative mt-4">
       <svg
         viewBox={`0 0 ${VB.w} ${VB.h}`}
-        className="block h-auto w-full touch-none select-none focus:outline-none"
+        className="block h-auto w-full touch-pan-y select-none focus:outline-none"
         role="img"
         aria-label={`Revenue by day, ${periodKey === "this" ? "this week" : "last week"}. ${data.map((v, i) => `${DAYS[i]} $${nf.format(v)}`).join(", ")}.`}
         tabIndex={0}
         onPointerMove={(e) => setHover(nearest(e.clientX, e.currentTarget))}
-        onPointerLeave={() => setHover(null)}
+        onPointerDown={(e) => setHover(nearest(e.clientX, e.currentTarget))}
+        // on touch, leave fires right after the tap — keep the tooltip up
+        onPointerLeave={(e) => {
+          if (e.pointerType === "mouse") setHover(null);
+        }}
         onBlur={() => setHover(null)}
         onKeyDown={(e) => {
           if (e.key === "ArrowRight") setHover((h) => Math.min((h ?? -1) + 1, data.length - 1));
@@ -382,7 +386,7 @@ function StatsChart({
     <div className="relative mt-4">
       <svg
         viewBox={`0 0 ${VB.w} ${VB.h}`}
-        className="block h-auto w-full touch-none select-none focus:outline-none"
+        className="block h-auto w-full touch-pan-y select-none focus:outline-none"
         role="img"
         aria-label={`Statistics by day: ${active.map((s) => s.label).join(", ")}. Values also shown in the data details table.`}
         tabIndex={0}
@@ -448,7 +452,10 @@ function StatsChart({
             height={baseline - pad.t}
             fill="transparent"
             onPointerMove={() => setHover(i)}
-            onPointerLeave={() => setHover(null)}
+            onPointerDown={() => setHover(i)}
+            onPointerLeave={(e) => {
+              if (e.pointerType === "mouse") setHover(null);
+            }}
           />
         ))}
       </svg>

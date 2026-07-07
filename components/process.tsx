@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useInView } from "@/components/viz-hooks";
 
 const STEPS = [
@@ -121,12 +123,12 @@ export default function Process() {
                       {s.text}
                     </p>
                     {dark && (
-                      <a
-                        href="#"
+                      <Link
+                        href="/contact"
                         className="mt-8 inline-block rounded-[3px] bg-white px-5 py-2.5 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
                       >
                         Book Free Call
-                      </a>
+                      </Link>
                     )}
                   </div>
                 </div>

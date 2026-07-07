@@ -2,6 +2,7 @@
 
 import { Archivo_Black } from "next/font/google";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 import NodesBackground from "@/components/nodes-background";
@@ -188,12 +189,12 @@ export default function GrowthPartner() {
               strategy, compelling design and{" "}
               <span className="text-white">measurable results</span>.
             </p>
-            <a
-              href="#"
+            <Link
+              href="/contact"
               className="mt-8 inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
             >
               Book Free Call
-            </a>
+            </Link>
           </Rise>
 
           <div className="relative flex items-end justify-center lg:h-full">

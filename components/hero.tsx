@@ -69,12 +69,12 @@ export default function Hero() {
           </nav>
         </div>
         <div className="flex items-center gap-7">
-          <a
-            href="#"
+          <Link
+            href="/contact"
             className="rounded-[3px] bg-white px-5 py-2.5 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
           >
             Book Free Call
-          </a>
+          </Link>
           <Link
             href="/contact"
             className="hidden text-[15px] text-white transition-colors hover:text-zinc-300 sm:block"
@@ -97,12 +97,12 @@ export default function Hero() {
           marketing built for measurable, long-term success.
         </p>
         <div className="mt-8">
-          <a
-            href="#"
+          <Link
+            href="/contact"
             className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
           >
             Book Free Call
-          </a>
+          </Link>
         </div>
       </div>
 

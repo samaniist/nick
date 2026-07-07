@@ -89,10 +89,7 @@ export default function Services() {
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((s, i) => (
             <Rise key={s.title} inView={inView} delay={160 + i * 80}>
-              <a
-                href="#"
-                className="group flex h-full flex-col rounded-xl border border-white/10 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-6 pt-8 text-center backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:from-white/[0.13]"
-              >
+              <div className="group flex h-full flex-col rounded-xl border border-white/10 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-6 pt-8 text-center backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:from-white/[0.13]">
                 <h3 className="text-xl font-medium sm:text-2xl">{s.title}</h3>
                 <p className="mx-auto mt-2 max-w-[280px] text-[15px] leading-relaxed text-zinc-400 sm:text-base">
                   {s.text}
@@ -106,7 +103,7 @@ export default function Services() {
                     className="mx-auto h-auto w-full max-w-[250px] transition-transform duration-500 ease-out group-hover:scale-[1.05]"
                   />
                 </div>
-              </a>
+              </div>
             </Rise>
           ))}
         </div>
