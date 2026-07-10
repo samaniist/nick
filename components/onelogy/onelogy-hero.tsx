@@ -3,9 +3,26 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 
+import { useLang } from "@/components/onelogy/lang";
+
 const WORDMARK = "ONÉLOGY".split("");
 
+const T = {
+  en: {
+    eyebrow: "Water-activated skincare",
+    caption: "Alpha Arbutin 2% — one tablet, dissolved fresh.",
+    meta: "12 mg · 32 tablets",
+  },
+  fr: {
+    eyebrow: "Soin activé à l’eau",
+    caption: "Alpha Arbutine 2 % — un comprimé, dissous à la demande.",
+    meta: "12 mg · 32 comprimés",
+  },
+};
+
 export default function OnelogyHero() {
+  const lang = useLang();
+  const t = T[lang];
   const sectionRef = useRef<HTMLElement | null>(null);
   const parallaxRef = useRef<HTMLSpanElement | null>(null);
 
@@ -66,7 +83,7 @@ export default function OnelogyHero() {
 
       <div className="relative flex flex-col items-center px-6">
         <p className="onelogy-eyebrow mb-6 text-[11px] font-medium uppercase tracking-[0.35em] text-neutral-400 sm:text-xs">
-          Water-activated skincare
+          {t.eyebrow}
         </p>
 
         {/* Wordmark — jolts when the product lands on it */}
@@ -111,9 +128,9 @@ export default function OnelogyHero() {
         </h1>
 
         <p className="onelogy-caption mt-8 max-w-md text-center text-sm text-neutral-500 sm:text-base">
-          Alpha Arbutin 2% — one tablet, dissolved fresh.
+          {t.caption}
           <span className="mx-2 inline-block h-3 w-px translate-y-0.5 bg-neutral-300" />
-          <span className="font-medium text-teal-600">12 mg · 32 tablets</span>
+          <span className="font-medium text-teal-600">{t.meta}</span>
         </p>
       </div>
     </section>

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 
+import { useLang } from "@/components/onelogy/lang";
 import { useInView } from "@/components/viz-hooks";
 
 /* Growth-strategy section modeled on nikolaradeski.com's hero: giant split
@@ -11,15 +12,37 @@ import { useInView } from "@/components/viz-hooks";
 
 /* Strategy chips floating around the card, each on its own depth plane. */
 const CHIPS = [
-  { label: "SEO", cls: "-left-14 top-6", z: 90, delay: 0 },
-  { label: "Paid Ads", cls: "-right-16 top-1/4", z: 120, delay: 1200 },
-  { label: "Marketplaces", cls: "-left-24 bottom-1/4", z: 70, delay: 2400 },
-  { label: "Branding", cls: "-right-14 bottom-8", z: 100, delay: 600 },
+  { en: "SEO", fr: "SEO", cls: "-left-14 top-6", z: 90, delay: 0 },
+  { en: "Paid Ads", fr: "Publicité", cls: "-right-16 top-1/4", z: 120, delay: 1200 },
+  { en: "Marketplaces", fr: "Marketplaces", cls: "-left-24 bottom-1/4", z: 70, delay: 2400 },
+  { en: "Branding", fr: "Image de marque", cls: "-right-14 bottom-8", z: 100, delay: 600 },
 ];
+
+const T = {
+  en: {
+    leftEyebrow: "Digital Growth Strategy for Onélogy",
+    leftWord: "Growth",
+    rightEyebrow:
+      "From an Innovative Skincare Product to a Globally Recognized Beauty Brand",
+    rightWord: "Strategy",
+    roadmap:
+      "A complete digital growth roadmap focused on brand positioning, organic visibility, paid acquisition, marketplace expansion, and long-term scalability.",
+  },
+  fr: {
+    leftEyebrow: "Stratégie de croissance digitale pour Onélogy",
+    leftWord: "Croissance",
+    rightEyebrow:
+      "D’un produit de soin innovant à une marque de beauté reconnue mondialement",
+    rightWord: "Stratégie",
+    roadmap:
+      "Une feuille de route complète de croissance digitale, axée sur le positionnement de marque, la visibilité organique, l’acquisition payante, l’expansion sur les marketplaces et la scalabilité à long terme.",
+  },
+};
 
 /* The centered product card: pointer-tracking 3D tilt + glare, same
    mechanics as the contact page's TiltCard, restyled for a light surface. */
 function TiltPhoto() {
+  const lang = useLang();
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
@@ -100,7 +123,7 @@ function TiltPhoto() {
         {/* floating strategy chips, each on its own depth plane */}
         {CHIPS.map((c) => (
           <span
-            key={c.label}
+            key={c.en}
             aria-hidden
             className={`viz-float pointer-events-none absolute hidden select-none rounded-full border border-neutral-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-neutral-600 shadow-[0_12px_28px_rgba(0,0,0,0.14)] lg:block ${c.cls}`}
             style={{
@@ -108,7 +131,7 @@ function TiltPhoto() {
               animationDelay: `${c.delay}ms`,
             }}
           >
-            {c.label}
+            {c[lang]}
           </span>
         ))}
       </div>
@@ -117,6 +140,13 @@ function TiltPhoto() {
 }
 
 export default function OnelogyGrowth() {
+  const lang = useLang();
+  const t = T[lang];
+  /* French words are longer — one size down so the row still fits. */
+  const wordCls =
+    lang === "fr"
+      ? "text-[clamp(2.25rem,5vw,4.75rem)]"
+      : "text-[clamp(2.75rem,6.2vw,5.75rem)]";
   const { ref, inView } = useInView<HTMLElement>();
   const fadeRef = useRef<HTMLDivElement | null>(null);
 
@@ -174,10 +204,12 @@ export default function OnelogyGrowth() {
         >
           <div className="flex flex-col items-center text-center lg:mr-12 lg:items-end lg:text-right">
             <p className="mb-3 text-sm text-neutral-500 sm:text-base">
-              Digital Growth Strategy for Onélogy
+              {t.leftEyebrow}
             </p>
-            <h2 className="select-none font-black uppercase leading-none tracking-[-0.03em] text-[clamp(2.75rem,6.2vw,5.75rem)]">
-              Growth
+            <h2
+              className={`select-none font-black uppercase leading-none tracking-[-0.03em] ${wordCls}`}
+            >
+              {t.leftWord}
             </h2>
           </div>
         </div>
@@ -197,11 +229,12 @@ export default function OnelogyGrowth() {
         >
           <div className="flex flex-col items-center text-center lg:ml-12 lg:items-start lg:text-left">
             <p className="mb-3 max-w-72 text-sm text-neutral-500 sm:text-base">
-              From an Innovative Skincare Product to a Globally Recognized
-              Beauty Brand
+              {t.rightEyebrow}
             </p>
-            <h2 className="select-none font-black uppercase leading-none tracking-[-0.03em] text-[clamp(2.75rem,6.2vw,5.75rem)]">
-              Strategy
+            <h2
+              className={`select-none font-black uppercase leading-none tracking-[-0.03em] ${wordCls}`}
+            >
+              {t.rightWord}
             </h2>
           </div>
         </div>
@@ -212,9 +245,7 @@ export default function OnelogyGrowth() {
         {...reveal("translate-y-6", 400)}
       >
         <span className="mx-auto mt-14 block max-w-xl px-6 text-center text-sm leading-relaxed text-neutral-500 sm:text-base">
-          A complete digital growth roadmap focused on brand positioning,
-          organic visibility, paid acquisition, marketplace expansion, and
-          long-term scalability.
+          {t.roadmap}
         </span>
       </p>
       </div>

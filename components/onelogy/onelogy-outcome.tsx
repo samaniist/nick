@@ -2,7 +2,46 @@
 
 import { useEffect, useRef } from "react";
 
+import { useLang } from "@/components/onelogy/lang";
 import { useCountUp, useInView } from "@/components/viz-hooks";
+
+/* Micro-copy inside the per-channel visuals. */
+const VIZ_T = {
+  en: {
+    addToCart: "Add to cart",
+    order: "✓ +1 order",
+    clicks: "Total clicks",
+    impressions: "Total impressions",
+    seoCaption: "Search performance — 12-month projection",
+    conversionsWeek: "Conversions per week",
+    sales: "sales",
+    amazonCaption: "Marketplace revenue — first year on Amazon",
+    followers: "Followers — community growth",
+    awareness: "Branded search volume",
+    funnel: ["Visitors", "Carts", "Checkout", "Orders"],
+    convRate: "Conversion rate",
+    growthCaption: "Compounding revenue — every channel feeding the next",
+  },
+  fr: {
+    addToCart: "Ajouter au panier",
+    order: "✓ +1 commande",
+    clicks: "Clics totaux",
+    impressions: "Impressions totales",
+    seoCaption: "Performance de recherche — projection sur 12 mois",
+    conversionsWeek: "Conversions par semaine",
+    sales: "ventes",
+    amazonCaption: "Revenus marketplace — première année sur Amazon",
+    followers: "Abonnés — croissance de la communauté",
+    awareness: "Volume de recherche de marque",
+    funnel: ["Visiteurs", "Paniers", "Paiement", "Commandes"],
+    convRate: "Taux de conversion",
+    growthCaption: "Revenus composés — chaque canal alimente le suivant",
+  },
+};
+
+function useVizT() {
+  return VIZ_T[useLang()];
+}
 
 /* Expected-outcome chain: the eight channels as animated cards linked by
    flowing ↓ connectors. Every card carries a live illustrative visual of
@@ -77,6 +116,7 @@ function EndDot({ x, y, color, on }: { x: number; y: number; color: string; on: 
 /* ————— per-channel visuals ————— */
 
 function WebsiteViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const block = (extra: string, delay: number) =>
     `transition-all duration-500 ease-out ${
       on ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
@@ -118,11 +158,11 @@ function WebsiteViz({ on }: { on: boolean }) {
         </div>
         <div className={block("flex items-center gap-3", 550)} style={blockStyle(550)}>
           <span className="rounded-full bg-violet-600 px-3 py-1.5 text-[10px] font-semibold text-white">
-            Add to cart
+            {vt.addToCart}
           </span>
           {on && (
             <span className="onelogy-oc-pop rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
-              ✓ +1 order
+              {vt.order}
             </span>
           )}
         </div>
@@ -132,19 +172,20 @@ function WebsiteViz({ on }: { on: boolean }) {
 }
 
 function SeoViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const clicks = useCountUp(12400, on, 1400);
   const impressions = useCountUp(348000, on, 1400);
   return (
     <div>
       <div className="flex gap-2">
         <div className="flex-1 rounded-lg bg-[#4285f4] px-3 py-2 text-white">
-          <p className="text-[10px] uppercase tracking-wide opacity-80">Total clicks</p>
+          <p className="text-[10px] uppercase tracking-wide opacity-80">{vt.clicks}</p>
           <p className="text-lg font-bold tabular-nums">
             {(clicks / 1000).toFixed(1)}K
           </p>
         </div>
         <div className="flex-1 rounded-lg bg-[#7b1fa2] px-3 py-2 text-white">
-          <p className="text-[10px] uppercase tracking-wide opacity-80">Total impressions</p>
+          <p className="text-[10px] uppercase tracking-wide opacity-80">{vt.impressions}</p>
           <p className="text-lg font-bold tabular-nums">
             {Math.round(impressions / 1000)}K
           </p>
@@ -167,9 +208,7 @@ function SeoViz({ on }: { on: boolean }) {
         <EndDot x={320} y={24} color="#4285f4" on={on} />
         <EndDot x={320} y={9} color="#7b1fa2" on={on} />
       </svg>
-      <p className="mt-2 text-[11px] text-neutral-400">
-        Search performance — 12-month projection
-      </p>
+      <p className="mt-2 text-[11px] text-neutral-400">{vt.seoCaption}</p>
     </div>
   );
 }
@@ -177,11 +216,12 @@ function SeoViz({ on }: { on: boolean }) {
 const AD_BARS = [18, 26, 22, 34, 30, 42, 38, 52, 58, 54, 70, 84];
 
 function PaidViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const roas = useCountUp(42, on, 1400);
   return (
     <div>
       <div className="flex items-baseline justify-between">
-        <p className="text-[11px] text-neutral-400">Conversions per week</p>
+        <p className="text-[11px] text-neutral-400">{vt.conversionsWeek}</p>
         <p className="text-lg font-bold tabular-nums text-violet-700">
           {(roas / 10).toFixed(1)}×{" "}
           <span className="text-[11px] font-medium text-neutral-400">ROAS</span>
@@ -205,13 +245,14 @@ function PaidViz({ on }: { on: boolean }) {
 }
 
 function AmazonViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const sales = useCountUp(182, on, 1400);
   return (
     <div>
       <div className="flex items-center justify-between">
         <p className="text-lg font-bold tabular-nums text-amber-700">
           +{sales}%{" "}
-          <span className="text-[11px] font-medium text-neutral-400">sales</span>
+          <span className="text-[11px] font-medium text-neutral-400">{vt.sales}</span>
         </p>
         <span
           className={`rounded-md bg-amber-600 px-2.5 py-1 text-[10px] font-bold text-white transition-all duration-500 ${
@@ -238,9 +279,7 @@ function AmazonViz({ on }: { on: boolean }) {
         />
         <EndDot x={320} y={12} color="#d97706" on={on} />
       </svg>
-      <p className="mt-2 text-[11px] text-neutral-400">
-        Marketplace revenue — first year on Amazon
-      </p>
+      <p className="mt-2 text-[11px] text-neutral-400">{vt.amazonCaption}</p>
     </div>
   );
 }
@@ -255,6 +294,7 @@ const HEARTS = [
 ];
 
 function SocialViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const followers = useCountUp(48200, on, 1600);
   return (
     <div className="relative flex items-end justify-between">
@@ -262,7 +302,7 @@ function SocialViz({ on }: { on: boolean }) {
         <p className="text-3xl font-black tabular-nums tracking-tight">
           {(followers / 1000).toFixed(1)}K
         </p>
-        <p className="text-[11px] text-neutral-400">Followers — community growth</p>
+        <p className="text-[11px] text-neutral-400">{vt.followers}</p>
       </div>
       <div className="relative h-24 w-1/2" aria-hidden>
         {on &&
@@ -281,6 +321,7 @@ function SocialViz({ on }: { on: boolean }) {
 }
 
 function AwarenessViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const lift = useCountUp(34, on, 1400);
   return (
     <div className="flex items-center gap-6">
@@ -299,27 +340,28 @@ function AwarenessViz({ on }: { on: boolean }) {
         <p className="text-3xl font-black tabular-nums tracking-tight text-teal-700">
           {(lift / 10).toFixed(1)}×
         </p>
-        <p className="text-[11px] text-neutral-400">Branded search volume</p>
+        <p className="text-[11px] text-neutral-400">{vt.awareness}</p>
       </div>
     </div>
   );
 }
 
 const FUNNEL = [
-  { label: "Visitors", w: 100, color: "#ddd6fe" },
-  { label: "Carts", w: 62, color: "#c4b5fd" },
-  { label: "Checkout", w: 38, color: "#a78bfa" },
-  { label: "Orders", w: 24, color: "#7c3aed" },
+  { w: 100, color: "#ddd6fe" },
+  { w: 62, color: "#c4b5fd" },
+  { w: 38, color: "#a78bfa" },
+  { w: 24, color: "#7c3aed" },
 ];
 
 function ConversionViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   const rate = useCountUp(38, on, 1400);
   return (
     <div className="flex items-center gap-6">
       <div className="flex-1 space-y-2">
         {FUNNEL.map((f, i) => (
-          <div key={f.label} className="flex items-center gap-3">
-            <span className="w-16 text-[11px] text-neutral-400">{f.label}</span>
+          <div key={i} className="flex items-center gap-3">
+            <span className="w-16 text-[11px] text-neutral-400">{vt.funnel[i]}</span>
             <div className="flex-1">
               <div
                 className="h-6 rounded-r-md transition-all duration-700 ease-out"
@@ -337,13 +379,14 @@ function ConversionViz({ on }: { on: boolean }) {
         <p className="text-3xl font-black tabular-nums tracking-tight text-violet-700">
           {(rate / 10).toFixed(1)}%
         </p>
-        <p className="text-[11px] text-neutral-400">Conversion rate</p>
+        <p className="text-[11px] text-neutral-400">{vt.convRate}</p>
       </div>
     </div>
   );
 }
 
 function GrowthViz({ on }: { on: boolean }) {
+  const vt = useVizT();
   return (
     <div>
       <svg viewBox="0 0 320 110" className="h-auto w-full overflow-visible" aria-hidden>
@@ -362,9 +405,7 @@ function GrowthViz({ on }: { on: boolean }) {
         />
         <EndDot x={320} y={8} color="#059669" on={on} />
       </svg>
-      <p className="mt-2 text-[11px] text-neutral-400">
-        Compounding revenue — every channel feeding the next
-      </p>
+      <p className="mt-2 text-[11px] text-neutral-400">{vt.growthCaption}</p>
     </div>
   );
 }
@@ -444,42 +485,61 @@ function useCardTilt(
 /* ————— the chain ————— */
 
 const CHAIN: {
-  title: string;
+  en: string;
+  fr: string;
   accent: string;
   Viz: ({ on }: { on: boolean }) => React.ReactNode;
 }[] = [
-  { title: "Website", accent: "#7c3aed", Viz: WebsiteViz },
-  { title: "SEO & GEO", accent: "#4285f4", Viz: SeoViz },
-  { title: "Paid Ads", accent: "#7c3aed", Viz: PaidViz },
-  { title: "Amazon", accent: "#d97706", Viz: AmazonViz },
-  { title: "Social Media", accent: "#ec4899", Viz: SocialViz },
-  { title: "Brand Awareness", accent: "#0d9488", Viz: AwarenessViz },
-  { title: "Higher Conversion", accent: "#7c3aed", Viz: ConversionViz },
-  { title: "Sustainable Growth.", accent: "#059669", Viz: GrowthViz },
+  { en: "Website", fr: "Site web", accent: "#7c3aed", Viz: WebsiteViz },
+  { en: "SEO & GEO", fr: "SEO & GEO", accent: "#4285f4", Viz: SeoViz },
+  { en: "Paid Ads", fr: "Publicité payante", accent: "#7c3aed", Viz: PaidViz },
+  { en: "Amazon", fr: "Amazon", accent: "#d97706", Viz: AmazonViz },
+  { en: "Social Media", fr: "Réseaux sociaux", accent: "#ec4899", Viz: SocialViz },
+  { en: "Brand Awareness", fr: "Notoriété de marque", accent: "#0d9488", Viz: AwarenessViz },
+  { en: "Higher Conversion", fr: "Conversion supérieure", accent: "#7c3aed", Viz: ConversionViz },
+  { en: "Sustainable Growth.", fr: "Croissance durable.", accent: "#059669", Viz: GrowthViz },
 ];
+
+const T = {
+  en: {
+    kicker: "Expected Outcome",
+    heading: "Expected Outcome",
+    intro:
+      "A scalable digital ecosystem where every channel supports the others.",
+  },
+  fr: {
+    kicker: "Résultat attendu",
+    heading: "Résultat attendu",
+    intro:
+      "Un écosystème digital scalable où chaque canal soutient les autres.",
+  },
+};
 
 function ChainItem({
   title,
   accent,
   index,
-  last,
   Viz,
-}: (typeof CHAIN)[number] & { index: number; last: boolean }) {
+}: Omit<(typeof CHAIN)[number], "en" | "fr"> & {
+  title: string;
+  index: number;
+}) {
   const { ref, inView } = useInView<HTMLDivElement>();
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLElement | null>(null);
   useCardTilt(frameRef, cardRef);
   return (
-    <div ref={ref} className="flex flex-col items-center">
+    <div ref={ref} className="h-full">
       <div
         ref={frameRef}
-        className={`w-full transition-all duration-700 ease-out [perspective:1400px] ${
+        className={`h-full w-full transition-all duration-700 ease-out [perspective:1400px] ${
           inView ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
         }`}
+        style={{ transitionDelay: `${(index % 2) * 120}ms` }}
       >
         <article
           ref={cardRef}
-          className={`relative rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-[translate,rotate,box-shadow] duration-300 will-change-transform [transform-style:preserve-3d] hover:-translate-y-1.5 hover:rotate-0 hover:shadow-[0_30px_70px_rgba(0,0,0,0.13)] sm:p-7 ${
+          className={`relative h-full rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-[translate,rotate,box-shadow] duration-300 will-change-transform [transform-style:preserve-3d] hover:-translate-y-1.5 hover:rotate-0 hover:shadow-[0_30px_70px_rgba(0,0,0,0.13)] sm:p-7 ${
             index % 2 ? "lg:rotate-[0.6deg]" : "lg:-rotate-[0.6deg]"
           }`}
         >
@@ -509,51 +569,64 @@ function ChainItem({
           </div>
         </article>
       </div>
-      {!last && (
-        <div className="flex flex-col items-center py-1 text-neutral-300" aria-hidden>
-          <span className="onelogy-oc-flow h-12 w-0.5" />
-          <svg viewBox="0 0 12 8" className="h-2 w-3 fill-current">
-            <path d="M0 0h12L6 8z" />
-          </svg>
-        </div>
-      )}
+    </div>
+  );
+}
+
+/* Flowing ↓ between the rows of the grid. */
+function RowConnector() {
+  return (
+    <div className="flex flex-col items-center py-1 text-neutral-300" aria-hidden>
+      <span className="onelogy-oc-flow h-10 w-0.5" />
+      <svg viewBox="0 0 12 8" className="h-2 w-3 fill-current">
+        <path d="M0 0h12L6 8z" />
+      </svg>
     </div>
   );
 }
 
 export default function OnelogyOutcome() {
+  const lang = useLang();
+  const t = T[lang];
   const { ref, inView } = useInView<HTMLElement>();
   return (
     <section
       ref={ref}
       className="relative z-10 w-full bg-white pb-32 pt-8 text-neutral-900"
     >
-      <div className="mx-auto max-w-xl px-6">
+      <div className="mx-auto max-w-4xl px-6">
         <div
           className={`transition-all duration-700 ease-out ${
             inView ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
           }`}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">
-            Expected Outcome
+            {t.kicker}
           </p>
           <h2 className="mt-3 text-3xl font-black tracking-[-0.02em] sm:text-5xl">
-            Expected Outcome
+            {t.heading}
           </h2>
-          <p className="mt-5 text-base leading-relaxed text-neutral-600 sm:text-lg">
-            A scalable digital ecosystem where every channel supports the
-            others.
+          <p className="mt-5 max-w-xl text-base leading-relaxed text-neutral-600 sm:text-lg">
+            {t.intro}
           </p>
         </div>
 
+        {/* 4 rows × 2 cards, in order, with a flowing ↓ between rows */}
         <div className="mt-14">
-          {CHAIN.map((c, i) => (
-            <ChainItem
-              key={c.title}
-              {...c}
-              index={i}
-              last={i === CHAIN.length - 1}
-            />
+          {[0, 2, 4, 6].map((start, r) => (
+            <div key={start}>
+              <div className="grid gap-5 sm:grid-cols-2 sm:gap-6">
+                {CHAIN.slice(start, start + 2).map(({ en, fr, ...rest }, j) => (
+                  <ChainItem
+                    key={en}
+                    {...rest}
+                    title={lang === "fr" ? fr : en}
+                    index={start + j}
+                  />
+                ))}
+              </div>
+              {r < 3 && <RowConnector />}
+            </div>
           ))}
         </div>
       </div>

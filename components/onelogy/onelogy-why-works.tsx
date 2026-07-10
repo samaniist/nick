@@ -2,27 +2,60 @@
 
 import { useEffect, useRef } from "react";
 
+import { useLang } from "@/components/onelogy/lang";
 import { useInView } from "@/components/viz-hooks";
 
 /* Glass panel that enters from the right edge of the page on scroll.
    The pastel washes behind the section give the frosted glass its color;
    the channel rows fade in staggered once the panel has arrived. */
 
-const CHANNELS = [
-  { title: "Organic Search", text: "Long-term traffic and authority." },
-  {
-    title: "AI Search",
-    text: "Visibility inside ChatGPT, Gemini, Perplexity and future AI search platforms.",
+const T = {
+  en: {
+    kicker: "Why This Approach",
+    heading: "Why This Strategy Works",
+    intro:
+      "Instead of relying on a single traffic source, this strategy creates multiple growth channels working together.",
+    channels: [
+      { title: "Organic Search", text: "Long-term traffic and authority." },
+      {
+        title: "AI Search",
+        text: "Visibility inside ChatGPT, Gemini, Perplexity and future AI search platforms.",
+      },
+      { title: "Paid Media", text: "Predictable customer acquisition." },
+      { title: "Marketplace", text: "Additional revenue through Amazon." },
+      {
+        title: "Brand",
+        text: "Higher customer trust, stronger positioning and better retention.",
+      },
+    ],
   },
-  { title: "Paid Media", text: "Predictable customer acquisition." },
-  { title: "Marketplace", text: "Additional revenue through Amazon." },
-  {
-    title: "Brand",
-    text: "Higher customer trust, stronger positioning and better retention.",
+  fr: {
+    kicker: "Pourquoi cette approche",
+    heading: "Pourquoi cette stratégie fonctionne",
+    intro:
+      "Au lieu de dépendre d’une seule source de trafic, cette stratégie crée plusieurs canaux de croissance qui travaillent ensemble.",
+    channels: [
+      {
+        title: "Recherche organique",
+        text: "Trafic et autorité à long terme.",
+      },
+      {
+        title: "Recherche IA",
+        text: "Visibilité dans ChatGPT, Gemini, Perplexity et les futures plateformes de recherche IA.",
+      },
+      { title: "Média payant", text: "Acquisition client prévisible." },
+      { title: "Marketplace", text: "Revenus supplémentaires via Amazon." },
+      {
+        title: "Marque",
+        text: "Plus de confiance client, un positionnement plus fort et une meilleure rétention.",
+      },
+    ],
   },
-];
+};
 
 export default function OnelogyWhyWorks() {
+  const lang = useLang();
+  const t = T[lang];
   const { ref, inView } = useInView<HTMLElement>();
   const frameRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -114,18 +147,17 @@ export default function OnelogyWhyWorks() {
             }}
           />
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-neutral-400">
-            Why This Approach
+            {t.kicker}
           </p>
           <h2 className="mt-3 text-3xl font-black tracking-[-0.02em] sm:text-5xl">
-            Why This Strategy Works
+            {t.heading}
           </h2>
           <p className="mt-5 text-base leading-relaxed text-neutral-600 sm:text-lg">
-            Instead of relying on a single traffic source, this strategy
-            creates multiple growth channels working together.
+            {t.intro}
           </p>
 
           <div className="mt-10 divide-y divide-neutral-900/10">
-            {CHANNELS.map((c, i) => (
+            {t.channels.map((c, i) => (
               <div
                 key={c.title}
                 className={`group -mx-3 flex flex-col gap-1 rounded-xl px-3 py-5 transition-all duration-700 ease-out hover:bg-white/50 sm:flex-row sm:items-baseline sm:gap-6 ${

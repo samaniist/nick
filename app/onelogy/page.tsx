@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { LangToggle, OnelogyLangProvider } from "@/components/onelogy/lang";
 import OnelogyHero from "@/components/onelogy/onelogy-hero";
 import OnelogyClosing from "@/components/onelogy/onelogy-closing";
 import OnelogyGrowth from "@/components/onelogy/onelogy-growth";
@@ -16,7 +17,8 @@ export const metadata: Metadata = {
 
 export default function OnelogyPage() {
   return (
-    <>
+    <OnelogyLangProvider>
+      <LangToggle />
       <OnelogyHero />
       <OnelogyGrowth />
       <OnelogyWhy />
@@ -24,6 +26,6 @@ export default function OnelogyPage() {
       <OnelogyWhyWorks />
       <OnelogyOutcome />
       <OnelogyClosing />
-    </>
+    </OnelogyLangProvider>
   );
 }
