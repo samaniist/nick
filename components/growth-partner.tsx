@@ -162,15 +162,16 @@ export default function GrowthPartner() {
       {/* giant outlined headline — an endless slow marquee drifting left; the
           bottom of the letters tucks under the dark stage */}
       <div className="overflow-hidden bg-[#fafaf9] pt-2">
-        <h2
+        {/* decorative marquee — deliberately not a heading, so the doubled
+            text stays out of the document outline */}
+        <div
+          aria-hidden="true"
           className={`${archivoBlack.className} gp-marquee -mb-[0.21em] flex w-max select-none whitespace-nowrap text-[9vw] uppercase leading-[0.95] tracking-[-0.02em] text-transparent will-change-transform`}
           style={{ WebkitTextStroke: "2px #09090b" }}
         >
           <span className="pr-[0.5em]">Growth Partner</span>
-          <span className="pr-[0.5em]" aria-hidden="true">
-            Growth Partner
-          </span>
-        </h2>
+          <span className="pr-[0.5em]">Growth Partner</span>
+        </div>
       </div>
 
       {/* dark stage */}

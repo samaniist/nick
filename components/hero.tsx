@@ -44,7 +44,7 @@ export default function Hero() {
 
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
         <div className="flex items-center gap-12">
-          <a href="#" aria-label="Nexlytic home">
+          <a href="/" aria-label="Nexlytic home">
             <Image
               src="/logo.png"
               alt="Nexlytic"

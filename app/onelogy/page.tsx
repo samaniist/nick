@@ -10,9 +10,11 @@ import OnelogyWhy from "@/components/onelogy/onelogy-why";
 import OnelogyWhyWorks from "@/components/onelogy/onelogy-why-works";
 
 export const metadata: Metadata = {
-  title: "Onélogy — Alpha Arbutin 2%",
+  title: { absolute: "Onélogy — Alpha Arbutin 2%" },
   description:
     "Onélogy water-activated skincare. Alpha Arbutin 2% brightening tablets — one tablet, dissolved fresh.",
+  // private client pitch — keep it out of search engines
+  robots: { index: false, follow: false },
 };
 
 export default function OnelogyPage() {
