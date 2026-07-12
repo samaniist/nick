@@ -666,3 +666,307 @@ body {
     opacity: 1;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Homepage service-card visuals (components/service-catalog.tsx):
+   looping micro-animations that keep every UI mockup alive — breathing
+   bars, drawing lines, typing, popping badges, a clicking cursor. */
+
+/* glossy light sweeping across a dark mock */
+.svc-sweep {
+  position: absolute;
+  inset: -20%;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.16) 50%,
+    transparent 62%
+  );
+  animation: svc-sweep 3.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes svc-sweep {
+  0%,
+  30% {
+    transform: translateX(-70%);
+  }
+  70%,
+  100% {
+    transform: translateX(70%);
+  }
+}
+
+/* skeleton shimmer (light surfaces) */
+.svc-shimmer {
+  background: linear-gradient(100deg, #f4f4f5 40%, #e4e4e7 50%, #f4f4f5 60%);
+  background-size: 200% 100%;
+  animation: svc-shimmer 2.4s linear infinite;
+}
+
+@keyframes svc-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* equalizer bars breathing between --eq-min and full height */
+.svc-eq {
+  transform-origin: bottom;
+  animation: svc-eq 2.4s ease-in-out infinite;
+}
+
+@keyframes svc-eq {
+  0%,
+  100% {
+    transform: scaleY(var(--eq-min, 0.55));
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* funnel rows breathing toward their full width */
+.svc-fill {
+  animation: svc-fill 3s ease-in-out infinite;
+}
+
+@keyframes svc-fill {
+  0%,
+  100% {
+    width: calc(var(--w) * 0.7);
+  }
+  50% {
+    width: var(--w);
+  }
+}
+
+/* badge popping in, holding, leaving */
+.svc-pop {
+  opacity: 0;
+  animation: svc-pop 5s ease-out infinite;
+}
+
+@keyframes svc-pop {
+  0%,
+  55% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.8);
+  }
+  62% {
+    opacity: 1;
+    transform: translateY(0) scale(1.06);
+  }
+  66%,
+  90% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+}
+
+/* button press pulse */
+.svc-press {
+  animation: svc-press 3.8s ease-in-out infinite;
+}
+
+@keyframes svc-press {
+  0%,
+  86%,
+  100% {
+    transform: scale(1);
+  }
+  91% {
+    transform: scale(0.9);
+  }
+  96% {
+    transform: scale(1.05);
+  }
+}
+
+/* chart line drawing itself, then fading to redraw (pathLength=1) */
+.svc-draw {
+  stroke-dasharray: 1;
+  animation: svc-draw 5s ease-in-out infinite;
+}
+
+@keyframes svc-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  55% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  86% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  95% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+  100% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+}
+
+/* search-bar typing + caret */
+.svc-type {
+  animation: svc-type 4.6s steps(20) infinite;
+}
+
+@keyframes svc-type {
+  0%,
+  8% {
+    width: 6%;
+  }
+  50%,
+  78% {
+    width: 76%;
+  }
+  92%,
+  100% {
+    width: 6%;
+  }
+}
+
+.svc-caret {
+  animation: svc-caret 0.9s steps(1) infinite;
+}
+
+@keyframes svc-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* vertical ticker (content rendered twice, slides -50%) */
+.svc-tick {
+  animation: svc-tick 8s linear infinite;
+}
+
+@keyframes svc-tick {
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+/* toast floating up and away (cha-ching) */
+.svc-riseup {
+  opacity: 0;
+  animation: svc-riseup 3.2s ease-out infinite;
+}
+
+@keyframes svc-riseup {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  14% {
+    opacity: 1;
+  }
+  68% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-26px);
+  }
+}
+
+/* palette swatches highlighted one after another (stagger via delay) */
+.svc-swatch {
+  animation: svc-swatch 3.2s ease-in-out infinite;
+}
+
+@keyframes svc-swatch {
+  0%,
+  22%,
+  100% {
+    transform: scale(1) translateY(0);
+  }
+  9% {
+    transform: scale(1.16) translateY(-3px);
+  }
+}
+
+/* cursor wandering to the CTA and clicking it */
+.svc-cursor {
+  animation: svc-cursor 6s ease-in-out infinite;
+}
+
+@keyframes svc-cursor {
+  0%,
+  8% {
+    transform: translate(0, 0);
+  }
+  32% {
+    transform: translate(-58px, 36px);
+  }
+  40% {
+    transform: translate(-58px, 36px) scale(0.82);
+  }
+  46% {
+    transform: translate(-58px, 36px) scale(1);
+  }
+  74% {
+    transform: translate(14px, -10px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* nav underline hopping between items */
+.svc-slide {
+  animation: svc-slide 4.2s ease-in-out infinite;
+}
+
+@keyframes svc-slide {
+  0%,
+  24% {
+    transform: translateX(0);
+  }
+  33%,
+  57% {
+    transform: translateX(30px);
+  }
+  66%,
+  90% {
+    transform: translateX(60px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .svc-sweep,
+  .svc-shimmer,
+  .svc-eq,
+  .svc-fill,
+  .svc-pop,
+  .svc-press,
+  .svc-draw,
+  .svc-type,
+  .svc-caret,
+  .svc-tick,
+  .svc-riseup,
+  .svc-swatch,
+  .svc-cursor,
+  .svc-slide {
+    animation: none;
+  }
+  .svc-pop {
+    opacity: 1;
+  }
+  .svc-riseup {
+    opacity: 0;
+  }
+}

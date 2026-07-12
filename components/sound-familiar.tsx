@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   EU_COUNTRIES,
@@ -137,15 +137,100 @@ function EuropeMap({ inView }: { inView: boolean }) {
   );
 }
 
+/* The section's closing stat, pinned to the viewport: scrolling on dives
+   into the black of the "+20" glyphs — the number scales up around the
+   solid "+" stroke until a black overlay finishes the fill, and the next
+   (black) section is right there when the stage unpins. */
+function ZoomStat() {
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const zoomRef = useRef<HTMLDivElement | null>(null);
+  const captionRef = useRef<HTMLParagraphElement | null>(null);
+  const blackRef = useRef<HTMLDivElement | null>(null);
+  const { ref: stageRef, inView } = useInView<HTMLDivElement>();
+  const projects = useCountUp(20, inView, 1300);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const tick = { on: false };
+
+    const update = () => {
+      tick.on = false;
+      const track = trackRef.current;
+      const zoom = zoomRef.current;
+      const caption = captionRef.current;
+      const black = blackRef.current;
+      if (!track || !zoom || !caption || !black) return;
+      const vh = window.innerHeight;
+      const rect = track.getBoundingClientRect();
+      const total = rect.height - vh;
+      if (total <= 0) return;
+      const p = Math.min(1, Math.max(0, -rect.top / total));
+      /* Zoom finishes at 80% of the track; the last 20% rides on the black
+         overlay only, so the scaled layer never grows past what the GPU
+         can rasterize cleanly (max scale 26 ≈ the "+" stroke filling the
+         viewport). Geometric scaling (pow) reads as a constant-speed dive
+         instead of a stall-then-explode. */
+      const t = Math.min(1, p / 0.8);
+      const e = t * t * (3 - 2 * t); // smoothstep
+      const scale = Math.pow(26, e);
+      zoom.style.transform = `scale(${scale.toFixed(4)}) translateZ(0)`;
+      /* drop the giant layer entirely once the overlay fully covers it */
+      zoom.style.visibility = p > 0.85 ? "hidden" : "visible";
+      caption.style.opacity = Math.min(1, Math.max(0, 1 - p * 3)).toFixed(3);
+      black.style.opacity = Math.min(1, Math.max(0, (p - 0.6) / 0.18)).toFixed(3);
+    };
+    const onScroll = () => {
+      if (!tick.on) {
+        tick.on = true;
+        requestAnimationFrame(update);
+      }
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
+  return (
+    <div ref={trackRef} className="relative mt-16 h-[260svh] sm:mt-20">
+      <div
+        ref={stageRef}
+        className="sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden"
+      >
+        <div
+          ref={zoomRef}
+          className="will-change-transform"
+          style={{ transformOrigin: "10.5% 55%" }}
+        >
+          <span className="block text-[clamp(6rem,18vw,15rem)] font-semibold leading-none tracking-tight text-zinc-950 tabular-nums">
+            +{projects}
+          </span>
+        </div>
+        <p ref={captionRef} className="mt-4 px-6 text-center text-base text-zinc-500 sm:text-lg">
+          Projects delivered across the EU
+        </p>
+        <div
+          ref={blackRef}
+          className="pointer-events-none absolute inset-0 bg-black opacity-0"
+          aria-hidden="true"
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function SoundFamiliar() {
   const { ref, inView } = useInView<HTMLElement>();
-  const projects = useCountUp(20, inView, 1300);
 
   return (
     <section
       ref={ref}
       id="sound-familiar"
-      className="relative z-30 border-t border-zinc-950/5 bg-[#fafaf9] py-20 font-sans text-zinc-950 sm:py-24"
+      className="relative z-30 border-t border-zinc-950/5 bg-[#fafaf9] pt-20 font-sans text-zinc-950 sm:pt-24"
     >
       <div className="grid gap-12 px-6 sm:px-10 lg:grid-cols-12 lg:gap-10 lg:px-14">
         <div className="lg:col-span-5">
@@ -196,17 +281,11 @@ export default function SoundFamiliar() {
         <div className="lg:col-span-7">
           <Drop inView={inView} delay={160}>
             <EuropeMap inView={inView} />
-            <div className="mt-6 flex items-baseline gap-3">
-              <span className="text-5xl font-semibold tracking-tight">
-                +{projects}
-              </span>
-              <span className="text-base text-zinc-500">
-                Projects delivered across the EU
-              </span>
-            </div>
           </Drop>
         </div>
       </div>
+
+      <ZoomStat />
     </section>
   );
 }
