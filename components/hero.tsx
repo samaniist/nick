@@ -3,27 +3,6 @@ import Link from "next/link";
 
 import KeyboardBall from "@/components/keyboard-ball";
 
-const navLinks = [
-  { label: "Home", href: "#", dropdown: false },
-  { label: "Services", href: "#", dropdown: true },
-  { label: "E-Commerce", href: "#", dropdown: true },
-];
-
-function ChevronDown() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      className="h-4 w-4"
-      aria-hidden="true"
-    >
-      <path d="m4 6 4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 /* Client logos, all rendered as flat light-gray marks on transparent
    backgrounds via brightness-0 invert. */
 const clients = [
@@ -43,30 +22,16 @@ export default function Hero() {
       <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
-        <div className="flex items-center gap-12">
-          <a href="/" aria-label="Nexlytic home">
-            <Image
-              src="/logo.png"
-              alt="Nexlytic"
-              width={652}
-              height={325}
-              priority
-              className="logo-neon h-9 w-auto"
-            />
-          </a>
-          <nav aria-label="Main" className="hidden items-center gap-9 md:flex">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="flex items-center gap-1.5 text-[15px] text-white transition-colors hover:text-zinc-300"
-              >
-                {link.label}
-                {link.dropdown && <ChevronDown />}
-              </a>
-            ))}
-          </nav>
-        </div>
+        <a href="/" aria-label="Nexlytic home">
+          <Image
+            src="/logo.png"
+            alt="Nexlytic"
+            width={652}
+            height={325}
+            priority
+            className="logo-neon h-9 w-auto"
+          />
+        </a>
         <div className="flex items-center gap-7">
           <Link
             href="/contact"
