@@ -29,8 +29,20 @@ export default function TiltCard({ children }: { children: React.ReactNode }) {
     const cur = { rx: 0, ry: 0, gx: 50, gy: 50 };
     const tgt = { rx: 0, ry: 0, gx: 50, gy: 50 };
     let raf = 0;
+    /* While a pointer is pressed, freeze the tilt completely — otherwise
+       the card keeps easing between mousedown and mouseup, the button
+       slides out from under the cursor and the click never lands. */
+    let frozen = false;
 
     const onMove = (e: PointerEvent) => {
+      if (e.buttons) return;
+      /* hold the card perfectly still while the pointer is over a form
+         control — a moving target makes clicks and text selection miss */
+      if ((e.target as Element | null)?.closest?.("button, input, select, textarea, a, label")) {
+        frozen = true;
+        return;
+      }
+      frozen = false;
       const r = frame.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width; // 0..1
       const py = (e.clientY - r.top) / r.height;
@@ -43,23 +55,35 @@ export default function TiltCard({ children }: { children: React.ReactNode }) {
       tgt.rx = 0;
       tgt.ry = 0;
     };
+    const onDown = () => {
+      frozen = true;
+    };
+    const onUp = () => {
+      frozen = false;
+    };
     const loop = () => {
-      cur.rx += (tgt.rx - cur.rx) * 0.09;
-      cur.ry += (tgt.ry - cur.ry) * 0.09;
-      cur.gx += (tgt.gx - cur.gx) * 0.12;
-      cur.gy += (tgt.gy - cur.gy) * 0.12;
-      card.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`;
-      card.style.setProperty("--gx", `${cur.gx.toFixed(1)}%`);
-      card.style.setProperty("--gy", `${cur.gy.toFixed(1)}%`);
+      if (!frozen) {
+        cur.rx += (tgt.rx - cur.rx) * 0.16;
+        cur.ry += (tgt.ry - cur.ry) * 0.16;
+        cur.gx += (tgt.gx - cur.gx) * 0.18;
+        cur.gy += (tgt.gy - cur.gy) * 0.18;
+        card.style.transform = `rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`;
+        card.style.setProperty("--gx", `${cur.gx.toFixed(1)}%`);
+        card.style.setProperty("--gy", `${cur.gy.toFixed(1)}%`);
+      }
       raf = requestAnimationFrame(loop);
     };
 
     frame.addEventListener("pointermove", onMove);
     frame.addEventListener("pointerleave", onLeave);
+    frame.addEventListener("pointerdown", onDown, true);
+    window.addEventListener("pointerup", onUp, true);
     raf = requestAnimationFrame(loop);
     return () => {
       frame.removeEventListener("pointermove", onMove);
       frame.removeEventListener("pointerleave", onLeave);
+      frame.removeEventListener("pointerdown", onDown, true);
+      window.removeEventListener("pointerup", onUp, true);
       cancelAnimationFrame(raf);
     };
   }, []);

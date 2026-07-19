@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 /* The contact form itself — shared between the /contact page (inside the
    3D tilt card) and the homepage contact section. Submits to
@@ -18,51 +18,22 @@ function FieldError({ id, msg }: { id: string; msg: string }) {
 const inputCls =
   "w-full min-h-[44px] rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-[15px] text-white placeholder:text-zinc-600 outline-none transition-all duration-200 focus:border-white/40 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(255,255,255,0.08)]";
 
-/* Submit button that leans toward the cursor (magnetic). */
-function MagneticButton({
+/* Submit button. Deliberately NO transform animations: inside the tilt
+   card's preserve-3d context, a hover/press scale transition makes
+   Chrome's hit-testing miss the button mid-animation and the click is
+   lost. Feedback is color-only — this button must never miss a click. */
+function SubmitButton({
   children,
   disabled,
 }: {
   children: React.ReactNode;
   disabled?: boolean;
 }) {
-  const ref = useRef<HTMLButtonElement | null>(null);
-
-  useEffect(() => {
-    const btn = ref.current;
-    if (!btn) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
-
-    const onMove = (e: PointerEvent) => {
-      const r = btn.getBoundingClientRect();
-      const dx = e.clientX - (r.left + r.width / 2);
-      const dy = e.clientY - (r.top + r.height / 2);
-      const dist = Math.hypot(dx, dy);
-      const reach = 120;
-      if (dist < reach) {
-        const pull = (1 - dist / reach) * 0.35;
-        btn.style.transform = `translate(${dx * pull}px, ${dy * pull}px)`;
-      } else {
-        btn.style.transform = "";
-      }
-    };
-    const onLeave = () => (btn.style.transform = "");
-    window.addEventListener("pointermove", onMove, { passive: true });
-    btn.addEventListener("pointerleave", onLeave);
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      btn.removeEventListener("pointerleave", onLeave);
-    };
-  }, []);
-
   return (
     <button
-      ref={ref}
       type="submit"
       disabled={disabled}
-      className="min-h-[48px] w-full cursor-pointer rounded-lg bg-white px-6 py-3 text-[15px] font-semibold text-black transition-colors duration-200 hover:bg-zinc-200 disabled:cursor-default disabled:opacity-50 sm:w-auto"
-      style={{ transition: "transform 180ms cubic-bezier(0.34, 1.4, 0.44, 1), background-color 200ms" }}
+      className="min-h-[48px] w-full cursor-pointer rounded-lg bg-white px-6 py-3 text-[15px] font-semibold text-black transition-colors duration-200 hover:bg-zinc-300 active:bg-zinc-400 disabled:cursor-default disabled:opacity-50 sm:w-auto"
     >
       {children}
     </button>
@@ -131,6 +102,42 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
   };
 
   const p = idPrefix;
+
+  /* Loud, unmissable confirmation: the form is replaced by a success panel. */
+  if (status === "sent") {
+    return (
+      <div className="mt-7 flex flex-col items-center rounded-xl border border-white/10 bg-white/[0.04] px-6 py-12 text-center">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-black">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-7 w-7"
+            aria-hidden="true"
+          >
+            <path d="m5 13 4 4L19 7" />
+          </svg>
+        </span>
+        <p className="mt-5 text-xl font-medium text-white sm:text-2xl" role="status">
+          Message sent!
+        </p>
+        <p className="mt-2 max-w-sm text-[15px] leading-relaxed text-zinc-400">
+          Thanks for reaching out — we&apos;ll reply within one business day.
+        </p>
+        <button
+          type="button"
+          onClick={() => setStatus("idle")}
+          className="mt-6 cursor-pointer text-sm text-zinc-500 underline-offset-4 transition-colors hover:text-white hover:underline"
+        >
+          Send another message
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form onSubmit={onSubmit} noValidate className="mt-7 space-y-5">
       <div className="grid gap-5 sm:grid-cols-2">
@@ -213,18 +220,44 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
         {errors.message && <FieldError id={`${p}-message-err`} msg={errors.message} />}
       </div>
 
+      {status === "fallback" && (
+        <div
+          className="flex items-start gap-3 rounded-lg border border-white/20 bg-white/[0.07] px-4 py-3.5"
+          role="status"
+          aria-live="polite"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="mt-0.5 h-5 w-5 shrink-0 text-white"
+            aria-hidden="true"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="m3 7 9 6 9-6" />
+          </svg>
+          <p className="text-sm leading-relaxed text-zinc-300">
+            We opened your email app with your message ready — just hit send
+            there. Nothing opened? Email us directly at{" "}
+            <a href="mailto:hello@nexlytic.de" className="font-medium text-white underline underline-offset-4">
+              hello@nexlytic.de
+            </a>
+            .
+          </p>
+        </div>
+      )}
+
       <div className="flex flex-col items-start gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
-        <MagneticButton disabled={status === "sending"}>
+        <SubmitButton disabled={status === "sending"}>
           {status === "sending" ? "Sending…" : "Send message ↗"}
-        </MagneticButton>
+        </SubmitButton>
         <p className="text-[13px] text-zinc-500" role="status" aria-live="polite">
-          {status === "sent"
-            ? "Message sent — we'll reply within one business day."
-            : status === "fallback"
-              ? "Your email app just opened — hit send and we're on it."
-              : status === "sending"
-                ? "Sending your message…"
-                : "Goes straight to our inbox — we reply within one business day."}
+          {status === "sending"
+            ? "Sending your message…"
+            : "Goes straight to our inbox — we reply within one business day."}
         </p>
       </div>
     </form>
