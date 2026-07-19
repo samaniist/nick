@@ -147,7 +147,10 @@ function ZoomStat() {
   const captionRef = useRef<HTMLParagraphElement | null>(null);
   const blackRef = useRef<HTMLDivElement | null>(null);
   const { ref: stageRef, inView } = useInView<HTMLDivElement>();
-  const projects = useCountUp(20, inView, 1300);
+  const counted = useCountUp(20, inView, 1300);
+  /* SSR (and no-JS/crawlers) must show the real figure, not 0 — the
+     count-up takes over only once the stage scrolls into view. */
+  const projects = inView ? counted : 20;
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -165,19 +168,19 @@ function ZoomStat() {
       const total = rect.height - vh;
       if (total <= 0) return;
       const p = Math.min(1, Math.max(0, -rect.top / total));
-      /* Zoom finishes at 80% of the track; the last 20% rides on the black
-         overlay only, so the scaled layer never grows past what the GPU
-         can rasterize cleanly (max scale 26 ≈ the "+" stroke filling the
-         viewport). Geometric scaling (pow) reads as a constant-speed dive
-         instead of a stall-then-explode. */
-      const t = Math.min(1, p / 0.8);
+      /* Keep the text layer small: max scale ~9 (a few-thousand-px raster
+         the GPU re-creates instantly in BOTH scroll directions) and let the
+         black overlay take over from p≈0.42. Bigger scales made Chrome
+         re-rasterize a giant layer when scrolling back up, shattering the
+         page. Geometric scaling (pow) reads as a constant-speed dive. */
+      const t = Math.min(1, p / 0.6);
       const e = t * t * (3 - 2 * t); // smoothstep
-      const scale = Math.pow(26, e);
+      const scale = Math.pow(9, e);
       zoom.style.transform = `scale(${scale.toFixed(4)}) translateZ(0)`;
-      /* drop the giant layer entirely once the overlay fully covers it */
-      zoom.style.visibility = p > 0.85 ? "hidden" : "visible";
-      caption.style.opacity = Math.min(1, Math.max(0, 1 - p * 3)).toFixed(3);
-      black.style.opacity = Math.min(1, Math.max(0, (p - 0.6) / 0.18)).toFixed(3);
+      /* free the layer only while fully covered by the overlay */
+      zoom.style.visibility = p > 0.75 ? "hidden" : "visible";
+      caption.style.opacity = Math.min(1, Math.max(0, 1 - p * 3.5)).toFixed(3);
+      black.style.opacity = Math.min(1, Math.max(0, (p - 0.42) / 0.16)).toFixed(3);
     };
     const onScroll = () => {
       if (!tick.on) {

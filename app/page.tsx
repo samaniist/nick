@@ -1,3 +1,4 @@
+import ContactCta from "@/components/contact-cta";
 import Footer from "@/components/footer";
 import GrowthPartner from "@/components/growth-partner";
 import Hero from "@/components/hero";
@@ -19,6 +20,7 @@ export default function Home() {
       <Process />
       <GrowthPartner />
       <ServiceCatalog />
+      <ContactCta />
       <Footer />
     </>
   );
