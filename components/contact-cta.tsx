@@ -13,7 +13,7 @@ export default function ContactCta() {
     <section
       ref={ref}
       id="contact"
-      className="relative z-30 overflow-hidden bg-black font-sans text-white"
+      className="relative font-sans text-white"
     >
       {/* faint dot field, same light language as the hero */}
       <div

@@ -1,5 +1,6 @@
 import ContactCta from "@/components/contact-cta";
 import Footer from "@/components/footer";
+import GlobeBackground from "@/components/globe-background";
 import GrowthPartner from "@/components/growth-partner";
 import Hero from "@/components/hero";
 import Process from "@/components/process";
@@ -20,8 +21,13 @@ export default function Home() {
       <Process />
       <GrowthPartner />
       <ServiceCatalog />
-      <ContactCta />
-      <Footer />
+      {/* one dark stage for the contact section + footer, with the dotted
+          globe rising behind both */}
+      <div className="relative z-30 overflow-hidden bg-black">
+        <GlobeBackground />
+        <ContactCta />
+        <Footer />
+      </div>
     </>
   );
 }
