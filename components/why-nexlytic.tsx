@@ -93,10 +93,13 @@ function BrainVisual({ className = "" }: { className?: string }) {
   }, []);
 
   useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const cur = { x: 0, y: 0 };
     const tgt = { x: 0, y: 0 };
     let raf = 0;
+    let running = false;
     const onMove = (e: PointerEvent) => {
       const el = wrapRef.current;
       if (!el) return;
@@ -121,9 +124,24 @@ function BrainVisual({ className = "" }: { className?: string }) {
       }
       raf = requestAnimationFrame(loop);
     };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) start();
+      else stop();
+    });
+    io.observe(wrap);
     window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
     return () => {
+      io.disconnect();
       window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
     };

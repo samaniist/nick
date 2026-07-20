@@ -54,8 +54,8 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
       if (!value.trim()) return "We need your email to reply.";
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "That email doesn't look right — check for typos.";
     }
-    if (name === "message" && value.trim().length < 10)
-      return "Give us a sentence or two about your project.";
+    if (name === "message" && value.trim() && value.trim().length < 10)
+      return "Give us a sentence or two, or leave it blank.";
     return undefined;
   };
 
@@ -71,6 +71,7 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
     const name = String(fd.get("name") ?? "");
     const email = String(fd.get("email") ?? "");
     const topic = String(fd.get("topic") ?? "");
+    const phone = String(fd.get("phone") ?? "");
     const message = String(fd.get("message") ?? "");
 
     const next: Errors = {
@@ -86,7 +87,7 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, topic, message }),
+        body: JSON.stringify({ name, email, topic, phone, message }),
       });
       if (!res.ok) throw new Error(`status ${res.status}`);
       form.reset();
@@ -95,7 +96,9 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
       /* delivery API unavailable — fall back to a prefilled mail draft so
          the lead is never lost */
       const subject = encodeURIComponent(`Project inquiry${topic ? ` — ${topic}` : ""} (${name})`);
-      const body = encodeURIComponent(`${message}\n\n— ${name}\n${email}`);
+      const body = encodeURIComponent(
+        `${message}\n\n— ${name}\n${email}${phone ? `\n${phone}` : ""}`,
+      );
       window.location.href = `mailto:hello@nexlytic.de?subject=${subject}&body=${body}`;
       setStatus("fallback");
     }
@@ -179,38 +182,52 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
         </div>
       </div>
 
-      <div>
-        <label htmlFor={`${p}-topic`} className="mb-2 block text-sm text-zinc-300">
-          What do you need?
-        </label>
-        <select id={`${p}-topic`} name="topic" defaultValue="" className={`${inputCls} appearance-none`}>
-          <option value="" className="bg-zinc-900">
-            Choose a service (optional)
-          </option>
-          {[
-            "Web Design & Development",
-            "SEO",
-            "Performance Marketing",
-            "E-Commerce",
-            "Branding",
-            "Something else",
-          ].map((o) => (
-            <option key={o} value={o} className="bg-zinc-900">
-              {o}
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div>
+          <label htmlFor={`${p}-topic`} className="mb-2 block text-sm text-zinc-300">
+            What do you need?
+          </label>
+          <select id={`${p}-topic`} name="topic" defaultValue="" className={`${inputCls} appearance-none`}>
+            <option value="" className="bg-zinc-900">
+              Choose a service (optional)
             </option>
-          ))}
-        </select>
+            {[
+              "Web Design & Development",
+              "SEO",
+              "Performance Marketing",
+              "E-Commerce",
+              "Branding",
+              "Something else",
+            ].map((o) => (
+              <option key={o} value={o} className="bg-zinc-900">
+                {o}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor={`${p}-phone`} className="mb-2 block text-sm text-zinc-300">
+            Phone <span className="text-zinc-500">(optional)</span>
+          </label>
+          <input
+            id={`${p}-phone`}
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            placeholder="+49 176 70767725"
+            className={inputCls}
+          />
+        </div>
       </div>
 
       <div>
         <label htmlFor={`${p}-message`} className="mb-2 block text-sm text-zinc-300">
-          Your project <span aria-hidden="true">*</span>
+          Your project <span className="text-zinc-500">(optional)</span>
         </label>
         <textarea
           id={`${p}-message`}
           name="message"
           rows={4}
-          required
           onBlur={onBlur}
           aria-invalid={!!errors.message}
           aria-describedby={errors.message ? `${p}-message-err` : undefined}

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "bad-json" }, { status: 400 });
   }
 
-  const { name, email, topic, message } = (body ?? {}) as Record<
+  const { name, email, topic, phone, message } = (body ?? {}) as Record<
     string,
     unknown
   >;
@@ -33,7 +33,6 @@ export async function POST(req: Request) {
     typeof message !== "string" ||
     !name.trim() ||
     !EMAIL_RE.test(email) ||
-    message.trim().length < 10 ||
     name.length > 200 ||
     email.length > 320 ||
     message.length > 5000
@@ -42,6 +41,8 @@ export async function POST(req: Request) {
   }
   const topicStr =
     typeof topic === "string" && topic.trim() ? topic.slice(0, 100) : "";
+  const phoneStr =
+    typeof phone === "string" && phone.trim() ? phone.trim().slice(0, 40) : "";
 
   const port = Number(SMTP_PORT);
   const transporter = nodemailer.createTransport({
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
       to: SMTP_TO || "hello@nexlytic.de",
       replyTo: email,
       subject: `Project inquiry${topicStr ? ` — ${topicStr}` : ""} (${name.trim()})`,
-      text: `${message.trim()}\n\n— ${name.trim()}\n${email}${topicStr ? `\nTopic: ${topicStr}` : ""}`,
+      text: `${message.trim() || "(no project details provided)"}\n\n— ${name.trim()}\n${email}${phoneStr ? `\n${phoneStr}` : ""}${topicStr ? `\nTopic: ${topicStr}` : ""}`,
     });
   } catch {
     return NextResponse.json({ error: "send-failed" }, { status: 502 });

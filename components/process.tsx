@@ -115,16 +115,18 @@ export default function Process() {
       }
     };
 
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
+
     measure();
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", () => {
-      measure();
-      onScroll();
-    });
+    window.addEventListener("resize", onResize);
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
     };
   }, []);
 

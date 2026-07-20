@@ -127,12 +127,17 @@ export default function GrowthPartner() {
   const photoRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement | null>(null);
 
-  // gentle depth parallax: photo leans with the pointer, cards drift against it
+  // gentle depth parallax: photo leans with the pointer, cards drift against it.
+  // Only runs while the section is on screen — otherwise this rAF loop would
+  // keep ticking for the entire time the page is open.
   useEffect(() => {
+    const section = ref.current;
+    if (!section) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const cur = { x: 0, y: 0 };
     const tgt = { x: 0, y: 0 };
     let raf = 0;
+    let running = false;
     const onMove = (e: PointerEvent) => {
       tgt.x = (e.clientX / window.innerWidth) * 2 - 1;
       tgt.y = (e.clientY / window.innerHeight) * 2 - 1;
@@ -148,13 +153,28 @@ export default function GrowthPartner() {
       }
       raf = requestAnimationFrame(loop);
     };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) start();
+      else stop();
+    });
+    io.observe(section);
     window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
     return () => {
+      io.disconnect();
       window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [ref]);
 
   return (
     <section ref={ref} id="growth-partner" className="relative z-30 font-sans">

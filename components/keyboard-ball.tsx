@@ -114,7 +114,9 @@ export default function KeyboardBall() {
     if (!ball) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // endless finger-press loop: push a key in, hold briefly, release
+    // endless finger-press loop: push a key in, hold briefly, release.
+    // Paused via IntersectionObserver below — otherwise this keeps typing
+    // and re-rendering forever even while scrolled far off screen.
     const faces = Array.from(ball.querySelectorAll<HTMLElement>(".gk-face"));
     const timers: number[] = [];
     const type = () => {
@@ -128,12 +130,16 @@ export default function KeyboardBall() {
       }
       timers.push(window.setTimeout(type, 320 + Math.random() * 480));
     };
-    timers.push(window.setTimeout(type, 500));
+    const stopTyping = () => {
+      timers.forEach(clearTimeout);
+      timers.length = 0;
+    };
 
     // gentle tilt toward the pointer
     const cur = { x: 0, y: 0 };
     const tgt = { x: 0, y: 0 };
     let raf = 0;
+    let running = false;
     const onMove = (e: PointerEvent) => {
       tgt.x = (e.clientX / window.innerWidth) * 2 - 1;
       tgt.y = (e.clientY / window.innerHeight) * 2 - 1;
@@ -146,11 +152,28 @@ export default function KeyboardBall() {
       }
       raf = requestAnimationFrame(loop);
     };
+    const start = () => {
+      if (!running) {
+        running = true;
+        raf = requestAnimationFrame(loop);
+        timers.push(window.setTimeout(type, 500));
+      }
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      stopTyping();
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) start();
+      else stop();
+    });
+    io.observe(ball);
     window.addEventListener("pointermove", onMove, { passive: true });
-    raf = requestAnimationFrame(loop);
 
     return () => {
-      timers.forEach(clearTimeout);
+      io.disconnect();
+      stopTyping();
       window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
     };
