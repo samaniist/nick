@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 import NodesBackground from "@/components/nodes-background";
+import TiltHover from "@/components/tilt-hover";
 import { useInView } from "@/components/viz-hooks";
 
 const SERVICES = [
@@ -10,6 +12,7 @@ const SERVICES = [
     title: "Performance Marketing",
     text: "Growth through data-driven campaigns",
     image: "/services/performance-marketing.webp",
+    href: "/services/performance-marketing",
   },
   {
     title: "Search Engine Optimization",
@@ -88,22 +91,37 @@ export default function Services() {
 
         <div className="mx-auto mt-14 grid max-w-6xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {SERVICES.map((s, i) => (
-            <Rise key={s.title} inView={inView} delay={160 + i * 80}>
-              <div className="group flex h-full flex-col rounded-xl border border-white/10 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-6 pt-8 text-center backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-white/25 hover:from-white/[0.13]">
-                <h3 className="text-xl font-medium sm:text-2xl">{s.title}</h3>
-                <p className="mx-auto mt-2 max-w-[280px] text-[15px] leading-relaxed text-zinc-400 sm:text-base">
-                  {s.text}
-                </p>
-                <div className="mt-auto pt-6">
-                  <Image
-                    src={s.image}
-                    alt={s.title}
-                    width={600}
-                    height={600}
-                    className="mx-auto h-auto w-full max-w-[250px] transition-transform duration-500 ease-out group-hover:scale-[1.05]"
-                  />
+            <Rise key={s.title} inView={inView} delay={160 + i * 80} className="h-full">
+              <TiltHover max={6} glare glareClass="rounded-xl" className="h-full">
+                <div className="group relative flex h-full flex-col rounded-xl border border-white/10 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-6 pt-8 text-center backdrop-blur-md transition-all duration-300 hover:border-white/25 hover:from-white/[0.13] hover:shadow-[0_32px_70px_-24px_rgba(0,0,0,0.85)]">
+                  <span className="card-shine rounded-xl" aria-hidden="true" />
+                  {s.href && (
+                    <Link
+                      href={s.href}
+                      aria-label={`Explore ${s.title}`}
+                      className="absolute inset-0 z-20 rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+                    />
+                  )}
+                  <h3 className="text-xl font-medium sm:text-2xl">{s.title}</h3>
+                  <p className="mx-auto mt-2 max-w-[280px] text-[15px] leading-relaxed text-zinc-400 sm:text-base">
+                    {s.text}
+                  </p>
+                  {s.href && (
+                    <span className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-white/70 transition-colors group-hover:text-white">
+                      Explore service ↗
+                    </span>
+                  )}
+                  <div className="mt-auto pt-6">
+                    <Image
+                      src={s.image}
+                      alt={s.title}
+                      width={600}
+                      height={600}
+                      className="mx-auto h-auto w-full max-w-[250px] transition-transform duration-500 ease-out group-hover:rotate-2 group-hover:scale-[1.07]"
+                    />
+                  </div>
                 </div>
-              </div>
+              </TiltHover>
             </Rise>
           ))}
         </div>

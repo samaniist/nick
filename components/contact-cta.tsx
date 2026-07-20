@@ -55,7 +55,10 @@ export default function ContactCta() {
               "Reply within one business day",
               "No obligations, no jargon",
             ].map((item) => (
-              <li key={item} className="flex items-center gap-3">
+              <li
+                key={item}
+                className="group flex items-center gap-3 transition-all duration-300 hover:translate-x-1.5 hover:text-zinc-200"
+              >
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -63,7 +66,7 @@ export default function ContactCta() {
                   strokeWidth="2.2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4.5 w-4.5 shrink-0 text-white"
+                  className="h-4.5 w-4.5 shrink-0 text-white transition-transform duration-300 group-hover:scale-125"
                   aria-hidden="true"
                 >
                   <path d="m5 13 4 4L19 7" />

@@ -3,6 +3,7 @@
 import { Archivo_Black } from "next/font/google";
 import Image from "next/image";
 
+import Magnetic from "@/components/magnetic";
 import { useInView } from "@/components/viz-hooks";
 
 const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
@@ -90,12 +91,14 @@ export default function Footer() {
             </h2>
           </Rise>
           <Rise inView={inView} delay={160}>
-            <a
-              href="mailto:hello@nexlytic.de"
-              className="mt-10 inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
-            >
-              Get in touch now
-            </a>
+            <Magnetic className="mt-10">
+              <a
+                href="mailto:hello@nexlytic.de"
+                className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
+              >
+                Get in touch now
+              </a>
+            </Magnetic>
           </Rise>
         </div>
 
@@ -108,7 +111,9 @@ export default function Footer() {
             </p>
           </Rise>
           <Rise inView={inView} delay={320}>
-            <SpinBadge />
+            <Magnetic strength={0.35}>
+              <SpinBadge />
+            </Magnetic>
           </Rise>
         </div>
       </div>

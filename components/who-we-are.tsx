@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 
+import TiltHover from "@/components/tilt-hover";
 import { useCountUp, useInView } from "@/components/viz-hooks";
 
 /* ---------------------------------------------------------------------------
@@ -118,6 +119,29 @@ function Rise({
   return (
     <div
       className={`${inView ? "viz-rise" : "opacity-0"} ${className}`}
+      style={{ animationDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
+/* Like Rise, but the card tips in from below in 3D — the grid parent
+   carries the perspective. */
+function Land({
+  inView,
+  delay,
+  className = "",
+  children,
+}: {
+  inView: boolean;
+  delay: number;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div
+      className={`${inView ? "viz-land" : "opacity-0"} ${className}`}
       style={{ animationDelay: `${delay}ms` }}
     >
       {children}
@@ -582,30 +606,36 @@ export default function WhoWeAre() {
             </div>
           </Rise>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <Rise inView={inView} delay={280}>
-              <StatTile label="Weekly revenue" prefix="$" data={period.revenue} color={REVENUE_COLOR} deltaPct={deltas.revenue} active={inView} />
-            </Rise>
-            <Rise inView={inView} delay={340}>
-              <StatTile label="New followers" data={period.stats.followers} color={SERIES[0].color} deltaPct={deltas.followers} active={inView} />
-            </Rise>
-            <Rise inView={inView} delay={400}>
-              <StatTile label="Accounts reached" data={period.stats.reached} color={SERIES[1].color} deltaPct={deltas.reached} active={inView} />
-            </Rise>
+          <div className="mt-4 grid gap-4 [perspective:1200px] sm:grid-cols-3">
+            <Land inView={inView} delay={280}>
+              <TiltHover max={5}>
+                <StatTile label="Weekly revenue" prefix="$" data={period.revenue} color={REVENUE_COLOR} deltaPct={deltas.revenue} active={inView} />
+              </TiltHover>
+            </Land>
+            <Land inView={inView} delay={360}>
+              <TiltHover max={5}>
+                <StatTile label="New followers" data={period.stats.followers} color={SERIES[0].color} deltaPct={deltas.followers} active={inView} />
+              </TiltHover>
+            </Land>
+            <Land inView={inView} delay={440}>
+              <TiltHover max={5}>
+                <StatTile label="Accounts reached" data={period.stats.reached} color={SERIES[1].color} deltaPct={deltas.reached} active={inView} />
+              </TiltHover>
+            </Land>
           </div>
 
-          <div className="mt-4 grid gap-4 lg:grid-cols-12">
+          <div className="mt-4 grid gap-4 [perspective:1600px] lg:grid-cols-12">
             {/* min-w-0: let the tracks shrink below the table's min width on
                 phones so the table scrolls inside its card instead of
                 stretching the page */}
             <div className="flex min-w-0 flex-col gap-4 lg:col-span-5">
-              <Rise inView={inView} delay={480}>
+              <Land inView={inView} delay={520}>
                 <Card title="Revenue" subtitle={period.label}>
                   <RevenueChart data={period.revenue} periodKey={periodKey} inView={inView} />
                 </Card>
-              </Rise>
+              </Land>
 
-              <Rise inView={inView} delay={560} className="flex-1">
+              <Land inView={inView} delay={600} className="flex-1">
                 <Card title="Data Details" subtitle="Daily engagement" className="h-full">
                   <div className="mt-4 overflow-x-auto">
                     <table className="w-full min-w-[380px] text-left text-[13px]">
@@ -641,10 +671,10 @@ export default function WhoWeAre() {
                     </table>
                   </div>
                 </Card>
-              </Rise>
+              </Land>
             </div>
 
-            <Rise inView={inView} delay={640} className="min-w-0 lg:col-span-7">
+            <Land inView={inView} delay={680} className="min-w-0 lg:col-span-7">
               <Card title="Statistics" subtitle={period.label} className="flex h-full flex-col">
                 <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="Toggle series">
                   {SERIES.map((s) => {
@@ -677,7 +707,7 @@ export default function WhoWeAre() {
                   <StatsChart stats={period.stats} visible={visible} inView={inView} />
                 </div>
               </Card>
-            </Rise>
+            </Land>
           </div>
         </div>
       </div>

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import HeroSpotlight from "@/components/hero-spotlight";
 import KeyboardBall from "@/components/keyboard-ball";
+import Magnetic from "@/components/magnetic";
 
 /* Client logos, all rendered as flat light-gray marks on transparent
    backgrounds via brightness-0 invert. */
@@ -18,12 +20,14 @@ const clients = [
 export default function Hero() {
   return (
     // sticky: the next section slides up over the hero on scroll
-    <section className="sticky top-0 flex min-h-svh flex-col overflow-hidden bg-black font-sans text-white">
+    <section className="sticky top-0 z-20 flex min-h-svh flex-col overflow-hidden bg-black font-sans text-white">
       {/* faint wash of the keyword neon over the whole section */}
       <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
+      {/* soft spotlight trailing the pointer */}
+      <HeroSpotlight />
 
       <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
-        <a href="/" aria-label="Nexlytic home">
+        <Link href="/" aria-label="Nexlytic home">
           <Image
             src="/logo.png"
             alt="Nexlytic"
@@ -32,7 +36,7 @@ export default function Hero() {
             priority
             className="logo-neon h-9 w-auto"
           />
-        </a>
+        </Link>
         <div className="flex items-center gap-7">
           <Link
             href="/contact"
@@ -62,12 +66,14 @@ export default function Hero() {
           marketing built for measurable, long-term success.
         </p>
         <div className="mt-8">
-          <Link
-            href="/contact"
-            className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
-          >
-            Book Free Call
-          </Link>
+          <Magnetic>
+            <Link
+              href="/contact"
+              className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
+            >
+              Book Free Call
+            </Link>
+          </Magnetic>
         </div>
       </div>
 

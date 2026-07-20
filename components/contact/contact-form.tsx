@@ -4,7 +4,7 @@ import { useState } from "react";
 
 /* The contact form itself — shared between the /contact page (inside the
    3D tilt card) and the homepage contact section. Submits to
-   /api/contact (Resend → hello@nexlytic.de) and falls back to a
+   /api/contact (IONOS SMTP → hello@nexlytic.de) and falls back to a
    prefilled mailto: draft if the delivery API is unavailable. */
 
 function FieldError({ id, msg }: { id: string; msg: string }) {

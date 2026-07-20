@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
 
-/* Sends the contact form to hello@nexlytic.de via Resend.
-   Requires RESEND_API_KEY in the environment (plus a verified
-   nexlytic.de domain in Resend); without it the endpoint answers 503
-   and the client falls back to a mailto: draft. */
+/* Sends the contact form to hello@nexlytic.de via IONOS SMTP.
+   Requires SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS (and optionally
+   SMTP_FROM/SMTP_TO) in the environment; without them the endpoint
+   answers 503 and the client falls back to a mailto: draft. */
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) {
+  const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_TO } =
+    process.env;
+  if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
     return NextResponse.json({ error: "not-configured" }, { status: 503 });
   }
 
@@ -41,23 +43,25 @@ export async function POST(req: Request) {
   const topicStr =
     typeof topic === "string" && topic.trim() ? topic.slice(0, 100) : "";
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${key}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "Nexlytic Website <hello@nexlytic.de>",
-      to: ["hello@nexlytic.de"],
-      reply_to: email,
-      subject: `Project inquiry${topicStr ? ` — ${topicStr}` : ""} (${name.trim()})`,
-      text: `${message.trim()}\n\n— ${name.trim()}\n${email}${topicStr ? `\nTopic: ${topicStr}` : ""}`,
-    }),
+  const port = Number(SMTP_PORT);
+  const transporter = nodemailer.createTransport({
+    host: SMTP_HOST,
+    port,
+    secure: port === 465, // IONOS: 465 = implicit TLS, 587 = STARTTLS
+    auth: { user: SMTP_USER, pass: SMTP_PASS },
   });
 
-  if (!res.ok) {
+  try {
+    await transporter.sendMail({
+      from: SMTP_FROM || `Nexlytic Website <${SMTP_USER}>`,
+      to: SMTP_TO || "hello@nexlytic.de",
+      replyTo: email,
+      subject: `Project inquiry${topicStr ? ` — ${topicStr}` : ""} (${name.trim()})`,
+      text: `${message.trim()}\n\n— ${name.trim()}\n${email}${topicStr ? `\nTopic: ${topicStr}` : ""}`,
+    });
+  } catch {
     return NextResponse.json({ error: "send-failed" }, { status: 502 });
   }
+
   return NextResponse.json({ ok: true });
 }

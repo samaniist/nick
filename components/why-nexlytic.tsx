@@ -253,6 +253,22 @@ export default function WhyNexlytic() {
                   style={{ animationDelay: `${400 + i * 350}ms` }}
                 />
               ))}
+              {/* data pulses traveling along the drawn connectors */}
+              {inView &&
+                PATHS.map((d, i) => (
+                  <path
+                    key={`comet-${d}`}
+                    d={d}
+                    fill="none"
+                    stroke="#18181b"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    vectorEffect="non-scaling-stroke"
+                    pathLength={1}
+                    className="path-comet"
+                    style={{ animationDelay: `${1600 + i * 1700}ms` }}
+                  />
+                ))}
             </svg>
 
             {RINGS.map((r, i) => (
@@ -287,6 +303,12 @@ export default function WhyNexlytic() {
                     animationDelay: `${500 + i * 150}ms`,
                   }}
                 >
+                  {on && (
+                    <span
+                      className="absolute inset-0 animate-ping rounded-full bg-zinc-950/25 motion-reduce:hidden"
+                      aria-hidden="true"
+                    />
+                  )}
                   {s.no}
                 </button>
               );

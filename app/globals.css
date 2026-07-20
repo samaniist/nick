@@ -25,6 +25,168 @@ body {
   font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
+/* Performance marketing page: a restrained data-grid and one purposeful
+   chart entrance. These are isolated from the homepage animation system. */
+.pm-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+}
+
+.pm-reveal {
+  animation: pm-reveal 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pm-delay-1 { animation-delay: 80ms; }
+.pm-delay-2 { animation-delay: 160ms; }
+.pm-delay-3 { animation-delay: 240ms; }
+
+.pm-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pm-draw 1.2s 420ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pm-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pm-dot 2.4s 1.4s ease-in-out infinite;
+}
+
+.pm-command-scene {
+  transition: filter 300ms ease;
+}
+
+.pm-command-scene::before {
+  content: "";
+  position: absolute;
+  inset: 8%;
+  z-index: -1;
+  border-radius: 999px;
+  background: radial-gradient(circle at var(--pmx, 50%) var(--pmy, 50%), rgba(185, 255, 43, 0.14), rgba(255, 255, 255, 0.025) 35%, transparent 68%);
+  filter: blur(14px);
+}
+
+.pm-orbit-ring {
+  animation: pm-orbit 14s linear infinite;
+}
+
+.pm-orbit-reverse {
+  animation-name: pm-orbit-reverse;
+  animation-duration: 19s;
+}
+
+.pm-core-scan {
+  animation: pm-core-scan 2.6s ease-in-out infinite;
+}
+
+.pm-float-a {
+  animation: pm-float-a 5.4s ease-in-out infinite;
+}
+
+.pm-float-b {
+  animation: pm-float-b 6.2s ease-in-out infinite;
+}
+
+.pm-metric-swap {
+  animation: pm-swap 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.pm-mini-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: pm-draw 700ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pm-signal-rail {
+  animation: pm-rail 22s linear infinite;
+}
+
+.pm-flow-orbit {
+  animation: pm-orbit-flat 18s linear infinite;
+}
+
+@keyframes pm-reveal {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pm-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes pm-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.62; transform: scale(1.7); }
+}
+
+@keyframes pm-orbit {
+  from { transform: translateZ(-35px) rotateX(67deg) rotateZ(0deg); }
+  to { transform: translateZ(-35px) rotateX(67deg) rotateZ(360deg); }
+}
+
+@keyframes pm-orbit-reverse {
+  from { transform: translateZ(10px) rotateY(69deg) rotateZ(360deg); }
+  to { transform: translateZ(10px) rotateY(69deg) rotateZ(0deg); }
+}
+
+@keyframes pm-core-scan {
+  0%, 100% { opacity: 0.45; transform: scale(0.88); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+
+@keyframes pm-float-a {
+  0%, 100% { transform: translateZ(115px) translateY(0); }
+  50% { transform: translateZ(115px) translateY(-8px); }
+}
+
+@keyframes pm-float-b {
+  0%, 100% { transform: translateZ(135px) translateY(0); }
+  50% { transform: translateZ(135px) translateY(9px); }
+}
+
+@keyframes pm-swap {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pm-rail {
+  to { transform: translateX(-50%); }
+}
+
+@keyframes pm-orbit-flat {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-reveal,
+  .pm-line,
+  .pm-dot,
+  .pm-orbit-ring,
+  .pm-core-scan,
+  .pm-float-a,
+  .pm-float-b,
+  .pm-metric-swap,
+  .pm-mini-line,
+  .pm-signal-rail,
+  .pm-flow-orbit {
+    animation: none;
+  }
+
+  .pm-line { stroke-dashoffset: 0; }
+
+  .pm-scroll-funnel {
+    min-height: auto !important;
+  }
+
+  .pm-scroll-stage {
+    position: relative !important;
+    min-height: auto !important;
+  }
+}
+
 /* Nexlytic logo everywhere on dark surfaces: forced white (the source PNG is
    dark) plus the same white-neon halo as the hero keywords. Replaces the
    Tailwind brightness-0 invert pair, which would collide with this filter. */
@@ -241,6 +403,102 @@ body {
 .viz-fade {
   opacity: 0;
   animation: viz-fade 700ms ease-out forwards;
+}
+
+/* 3D landing entrance for dashboard cards (components/who-we-are.tsx):
+   cards tip in from below and settle flat — parent needs perspective. */
+@keyframes viz-land {
+  from {
+    opacity: 0;
+    transform: rotateX(18deg) translateY(52px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(0deg) translateY(0) scale(1);
+  }
+}
+
+.viz-land {
+  opacity: 0;
+  transform-origin: 50% 100%;
+  animation: viz-land 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Radiating "we are here" rings on the EU map (components/sound-familiar.tsx). */
+@keyframes map-ping {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(7);
+    opacity: 0;
+  }
+}
+
+.map-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: map-ping 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* Diagonal light streak sweeping across a card on hover
+   (components/services.tsx — add inside a .group). */
+.card-shine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.card-shine::before {
+  content: "";
+  position: absolute;
+  top: -25%;
+  bottom: -25%;
+  left: -70%;
+  width: 45%;
+  transform: skewX(-18deg) translateX(0);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transition: transform 900ms ease;
+}
+
+.group:hover > .card-shine::before {
+  transform: skewX(-18deg) translateX(420%);
+}
+
+/* Comet pulse traveling along a connector path
+   (components/why-nexlytic.tsx — on a path with pathLength=1). */
+@keyframes path-comet {
+  from {
+    stroke-dashoffset: 1.1;
+  }
+  to {
+    stroke-dashoffset: -1.1;
+  }
+}
+
+.path-comet {
+  stroke-dasharray: 0.1 1;
+  /* parked off-path until the (possibly delayed) animation kicks in */
+  stroke-dashoffset: 1.1;
+  animation: path-comet 3.4s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .viz-land {
+    animation: viz-fade 400ms ease-out forwards;
+  }
+  .map-ping,
+  .path-comet {
+    animation: none;
+  }
+  .map-ping {
+    opacity: 0;
+  }
+  .card-shine {
+    display: none;
+  }
 }
 
 /* Endless slow marquee (components/growth-partner.tsx). The row holds two
@@ -624,5 +882,123 @@ body {
   }
   .svc-riseup {
     opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Process-card visuals (components/process-visuals.tsx): one small living
+   graphic per step — a scanning magnifier, a traveling roadmap token, a
+   typing code window, a rising growth line. */
+
+/* magnifier sweeping across the analysis bars */
+@keyframes proc-scan {
+  0%,
+  6% {
+    left: 4%;
+  }
+  46%,
+  54% {
+    left: 80%;
+  }
+  94%,
+  100% {
+    left: 4%;
+  }
+}
+
+.proc-scan {
+  animation: proc-scan 4.8s ease-in-out infinite;
+}
+
+/* token traveling node to node along the strategy path */
+@keyframes proc-travel {
+  0%,
+  4% {
+    left: 6%;
+    top: 82%;
+  }
+  25%,
+  29% {
+    left: 34%;
+    top: 30%;
+  }
+  50%,
+  54% {
+    left: 64%;
+    top: 68%;
+  }
+  75%,
+  79% {
+    left: 92%;
+    top: 12%;
+  }
+  96%,
+  100% {
+    left: 6%;
+    top: 82%;
+  }
+}
+
+.proc-token {
+  animation: proc-travel 5.6s ease-in-out infinite;
+}
+
+/* a code line typing itself out to its target width, then resetting */
+@keyframes proc-line-type {
+  0% {
+    width: 0%;
+    opacity: 0.5;
+  }
+  30%,
+  80% {
+    width: var(--w);
+    opacity: 1;
+  }
+  92%,
+  100% {
+    width: 0%;
+    opacity: 0.5;
+  }
+}
+
+.proc-code-line {
+  width: 0%;
+  animation: proc-line-type 4.4s ease-in-out infinite;
+}
+
+/* build progress bar filling up */
+@keyframes proc-build-fill {
+  0%,
+  8% {
+    width: 6%;
+  }
+  85%,
+  100% {
+    width: 100%;
+  }
+}
+
+.proc-build-fill {
+  animation: proc-build-fill 4.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .proc-scan {
+    animation: none;
+    left: 42%;
+  }
+  .proc-token {
+    animation: none;
+    left: 64%;
+    top: 68%;
+  }
+  .proc-code-line {
+    animation: none;
+    width: var(--w);
+    opacity: 1;
+  }
+  .proc-build-fill {
+    animation: none;
+    width: 70%;
   }
 }

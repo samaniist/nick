@@ -1,14 +1,13 @@
 "use client";
 
-import { Archivo_Black } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
+import Magnetic from "@/components/magnetic";
 import NodesBackground from "@/components/nodes-background";
+import TiltHover from "@/components/tilt-hover";
 import { useInView } from "@/components/viz-hooks";
-
-const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
 
 /* Catmull-Rom → bézier, for the small monochrome chart card. */
 function smoothPath(pts: { x: number; y: number }[]) {
@@ -159,21 +158,6 @@ export default function GrowthPartner() {
 
   return (
     <section ref={ref} id="growth-partner" className="relative z-30 font-sans">
-      {/* giant outlined headline — an endless slow marquee drifting left; the
-          bottom of the letters tucks under the dark stage */}
-      <div className="overflow-hidden bg-[#fafaf9] pt-2">
-        {/* decorative marquee — deliberately not a heading, so the doubled
-            text stays out of the document outline */}
-        <div
-          aria-hidden="true"
-          className={`${archivoBlack.className} gp-marquee -mb-[0.21em] flex w-max select-none whitespace-nowrap text-[9vw] uppercase leading-[0.95] tracking-[-0.02em] text-transparent will-change-transform`}
-          style={{ WebkitTextStroke: "2px #09090b" }}
-        >
-          <span className="pr-[0.5em]">Growth Partner</span>
-          <span className="pr-[0.5em]">Growth Partner</span>
-        </div>
-      </div>
-
       {/* dark stage */}
       <div className="relative z-10 overflow-hidden bg-black text-white">
         <NodesBackground />
@@ -190,12 +174,14 @@ export default function GrowthPartner() {
               strategy, compelling design and{" "}
               <span className="text-white">measurable results</span>.
             </p>
-            <Link
-              href="/contact"
-              className="mt-8 inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
-            >
-              Book Free Call
-            </Link>
+            <Magnetic className="mt-8">
+              <Link
+                href="/contact"
+                className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
+              >
+                Book Free Call
+              </Link>
+            </Magnetic>
           </Rise>
 
           <div className="relative flex items-end justify-center lg:h-full">
@@ -217,12 +203,16 @@ export default function GrowthPartner() {
             <div ref={cardsRef} className="space-y-5 will-change-transform">
               <Rise inView={inView} delay={200}>
                 <div className="viz-float">
-                  <ChartCard />
+                  <TiltHover max={7}>
+                    <ChartCard />
+                  </TiltHover>
                 </div>
               </Rise>
               <Rise inView={inView} delay={320}>
                 <div className="viz-float" style={{ animationDelay: "1.2s", animationDuration: "7s" }}>
-                  <StatsCard />
+                  <TiltHover max={7}>
+                    <StatsCard />
+                  </TiltHover>
                 </div>
               </Rise>
             </div>

@@ -7,6 +7,7 @@ import {
   EU_MAP_VIEWBOX,
   NEIGHBOR_COUNTRIES,
 } from "@/components/eu-map-data";
+import TiltHover from "@/components/tilt-hover";
 import { useCountUp, useInView } from "@/components/viz-hooks";
 
 const HOVER_FILL = "#27272a";
@@ -71,6 +72,17 @@ function Drop({
 function EuropeMap({ inView }: { inView: boolean }) {
   const [country, setCountry] = useState<string | null>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  /* Munich HQ marker, in viewBox units — derived from Germany's bounding
+     box after mount (Munich sits in Germany's south-east). */
+  const [hq, setHq] = useState<{ x: number; y: number; r: number } | null>(null);
+
+  useEffect(() => {
+    const de = svgRef.current?.querySelector<SVGPathElement>('[data-name="Germany"]');
+    if (!de) return;
+    const b = de.getBBox();
+    setHq({ x: b.x + b.width * 0.66, y: b.y + b.height * 0.86, r: b.width * 0.045 });
+  }, []);
 
   return (
     <div
@@ -91,6 +103,7 @@ function EuropeMap({ inView }: { inView: boolean }) {
       }}
     >
       <svg
+        ref={svgRef}
         viewBox={EU_MAP_VIEWBOX}
         className="block h-auto w-full"
         role="img"
@@ -106,6 +119,7 @@ function EuropeMap({ inView }: { inView: boolean }) {
             <path
               key={c.name}
               d={c.d}
+              data-name={c.name}
               className={`cursor-pointer ${inView ? "viz-fade" : "opacity-0"}`}
               style={{
                 fill: country === c.name ? HOVER_FILL : "#dededb",
@@ -119,6 +133,23 @@ function EuropeMap({ inView }: { inView: boolean }) {
             </path>
           ))}
         </g>
+        {/* radiating "we are here" ping on Munich */}
+        {hq && (
+          <g pointerEvents="none" aria-hidden="true">
+            <circle className="map-ping" cx={hq.x} cy={hq.y} r={hq.r} fill="none" stroke="#18181b" strokeWidth={hq.r * 0.35} />
+            <circle
+              className="map-ping"
+              cx={hq.x}
+              cy={hq.y}
+              r={hq.r}
+              fill="none"
+              stroke="#18181b"
+              strokeWidth={hq.r * 0.35}
+              style={{ animationDelay: "1.3s" }}
+            />
+            <circle cx={hq.x} cy={hq.y} r={hq.r} fill="#18181b" stroke="#ffffff" strokeWidth={hq.r * 0.45} />
+          </g>
+        )}
       </svg>
 
       {country && (
@@ -254,8 +285,10 @@ export default function SoundFamiliar() {
           <ul className="mt-10 space-y-3">
             {PAIN_POINTS.map((p, i) => (
               <Drop key={p.text} inView={inView} delay={180 + i * 90}>
-                <li className="group flex items-center gap-4 rounded-md border border-zinc-950/10 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-zinc-950/15 hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.15)] sm:p-5">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] border border-zinc-950/10 text-zinc-500 transition-colors duration-300 group-hover:border-zinc-950 group-hover:bg-zinc-950 group-hover:text-white">
+                <TiltHover max={3}>
+                <li className="group flex items-center gap-4 rounded-md border border-zinc-950/10 bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-300 hover:border-zinc-950/15 hover:shadow-[0_16px_40px_-12px_rgba(0,0,0,0.15)] sm:p-5">
+                  <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-[6px] border border-zinc-950/10 text-zinc-500 transition-colors duration-300 group-hover:border-zinc-950 group-hover:bg-zinc-950 group-hover:text-white">
+                    {/* problem icon flips away, a check takes its place */}
                     <svg
                       viewBox="0 0 24 24"
                       fill="none"
@@ -263,19 +296,37 @@ export default function SoundFamiliar() {
                       strokeWidth={1.5}
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="h-5 w-5"
+                      className="h-5 w-5 transition-all duration-300 group-hover:scale-50 group-hover:opacity-0"
                       aria-hidden="true"
                     >
                       {p.icon}
                     </svg>
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={2.2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="absolute h-5 w-5 scale-50 opacity-0 transition-all delay-100 duration-300 group-hover:scale-100 group-hover:opacity-100"
+                      aria-hidden="true"
+                    >
+                      <path d="m5 13 4 4L19 7" />
+                    </svg>
                   </span>
-                  <span className="text-base leading-snug text-zinc-700">
+                  {/* hovering crosses the problem out — that's the promise */}
+                  <span className="relative text-base leading-snug text-zinc-700 transition-colors duration-300 group-hover:text-zinc-400">
                     {p.text}
+                    <span
+                      className="absolute left-0 top-1/2 h-[1.5px] w-full origin-left scale-x-0 bg-zinc-950 transition-transform duration-400 ease-out group-hover:scale-x-100"
+                      aria-hidden="true"
+                    />
                   </span>
                   <span className="ml-auto text-xs font-medium text-zinc-300 tabular-nums">
                     0{i + 1}
                   </span>
                 </li>
+                </TiltHover>
               </Drop>
             ))}
           </ul>
