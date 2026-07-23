@@ -106,6 +106,16 @@ export default function Process() {
         card.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px) brightness(${dim.toFixed(3)})` : "";
         card.style.zIndex = String(Math.round(100 - abs * 10));
         card.style.opacity = String(Math.max(0.35, 1 - abs * 0.22));
+        // Only the card(s) near center pay for the expensive glass blur;
+        // the rest fall back to the cheap static class below. Recomputing
+        // backdrop-filter on all four every scroll frame was the main
+        // source of the slow, stuttering scroll through this section.
+        const wantsStrongBackdrop = abs < 0.5;
+        card.style.backdropFilter = wantsStrongBackdrop ? "blur(24px)" : "";
+        card.style.setProperty(
+          "-webkit-backdrop-filter",
+          wantsStrongBackdrop ? "blur(24px)" : "",
+        );
       });
     };
     const onScroll = () => {
@@ -172,7 +182,7 @@ export default function Process() {
                 ref={(el) => {
                   cardsRef.current[i] = el;
                 }}
-                className="absolute flex w-[280px] shrink-0 flex-col rounded-[28px] border border-white/10 bg-linear-to-b from-white/[0.1] via-white/[0.05] to-white/[0.02] p-6 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-xl will-change-transform sm:w-[400px] sm:p-7 lg:w-[500px] lg:p-8 xl:w-[560px] xl:p-9"
+                className="absolute flex w-[280px] shrink-0 flex-col rounded-[28px] border border-white/10 bg-linear-to-b from-white/[0.1] via-white/[0.05] to-white/[0.02] p-6 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-md will-change-[transform,filter] sm:w-[400px] sm:p-7 lg:w-[500px] lg:p-8 xl:w-[560px] xl:p-9"
               >
                 <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em] text-zinc-500 sm:text-sm">
                   <span>Step {s.no}</span>
