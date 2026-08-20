@@ -68,14 +68,15 @@ function SpinBadge() {
   );
 }
 
-export default function Footer() {
+export default function Footer({ showCta = true }: { showCta?: boolean }) {
   const { ref, inView } = useInView<HTMLElement>();
 
   return (
     <footer ref={ref} className="relative font-sans text-white">
 
       {/* CTA band */}
-      <div className="mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-24 sm:px-10 lg:grid-cols-[1fr_minmax(280px,380px)] lg:items-center lg:gap-8">
+      {showCta && (
+        <div className="mx-auto grid max-w-7xl gap-12 px-6 pb-20 pt-24 sm:px-10 lg:grid-cols-[1fr_minmax(280px,380px)] lg:items-center lg:gap-8">
         <div>
           <Rise inView={inView} delay={0}>
             <p className="text-base font-medium text-zinc-400">Ready for real growth?</p>
@@ -116,7 +117,8 @@ export default function Footer() {
             </Magnetic>
           </Rise>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* link columns */}
       <div className="border-t border-white/10">

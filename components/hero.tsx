@@ -39,6 +39,12 @@ export default function Hero() {
         </Link>
         <div className="flex items-center gap-7">
           <Link
+            href="/case-studies"
+            className="hidden text-[15px] text-white transition-colors hover:text-zinc-300 sm:block"
+          >
+            Our Work
+          </Link>
+          <Link
             href="/contact"
             className="rounded-[3px] bg-white px-5 py-2.5 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
           >
