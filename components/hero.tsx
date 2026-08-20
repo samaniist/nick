@@ -26,8 +26,8 @@ export default function Hero() {
       {/* soft spotlight trailing the pointer */}
       <HeroSpotlight />
 
-      <header className="relative z-10 flex items-center justify-between px-6 py-6 sm:px-10 lg:px-14">
-        <Link href="/" aria-label="Nexlytic home">
+      <header className="relative z-10 flex flex-col items-stretch gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-6 lg:px-14">
+        <Link href="/" aria-label="Nexlytic home" className="w-fit rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
           <Image
             src="/logo.png"
             alt="Nexlytic"
@@ -37,26 +37,29 @@ export default function Hero() {
             className="logo-neon h-9 w-auto"
           />
         </Link>
-        <div className="flex items-center gap-7">
+        <nav
+          aria-label="Primary navigation"
+          className="grid w-full grid-cols-[1fr_1.25fr_1fr] items-center gap-2 sm:flex sm:w-auto sm:gap-7"
+        >
           <Link
             href="/case-studies"
-            className="hidden text-[15px] text-white transition-colors hover:text-zinc-300 sm:block"
+            className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-[3px] border border-white/15 px-2 text-xs text-white transition-colors hover:border-white/35 hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:min-h-0 sm:rounded-none sm:border-0 sm:px-0 sm:text-[15px] sm:hover:bg-transparent sm:hover:text-zinc-300"
           >
             Our Work
           </Link>
           <Link
             href="/contact"
-            className="rounded-[3px] bg-white px-5 py-2.5 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
+            className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-[3px] bg-white px-2 text-xs font-medium text-black transition-colors hover:bg-zinc-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:px-5 sm:text-[15px]"
           >
             Book Free Call
           </Link>
           <Link
             href="/contact"
-            className="hidden text-[15px] text-white transition-colors hover:text-zinc-300 sm:block"
+            className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-[3px] border border-white/15 px-2 text-xs text-white transition-colors hover:border-white/35 hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:min-h-0 sm:rounded-none sm:border-0 sm:px-0 sm:text-[15px] sm:hover:bg-transparent sm:hover:text-zinc-300"
           >
             Contact
           </Link>
-        </div>
+        </nav>
       </header>
 
       <div className="relative z-10 flex flex-1 flex-col justify-center px-6 sm:px-10 lg:pl-28 lg:pr-14">
