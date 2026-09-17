@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 
+import styles from "./process.module.css";
+
 import Magnetic from "@/components/magnetic";
 import ProcessBackground from "@/components/process-background";
 import {
@@ -64,79 +66,69 @@ export default function Process() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
-  /* Glass cards fanned out in 3D. Scrolling drives one continuous value —
-     the "active" position — and every card reads its distance from it: the
-     nearest card sits dead-center, sharp and at full size; the rest peel
-     away to the sides, rotated in perspective, smaller, dimmer, blurred.
-     Whatever card the scroll settles nearest to is the one on stage. */
+  // Keep scroll work to compositor-friendly transforms and opacity.
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return;
-
+    const deck = window.matchMedia(
+      "(min-width: 768px) and (min-height: 800px) and (prefers-reduced-motion: no-preference)",
+    );
+    let frame = 0;
     let spacing = 360;
-    const tick = { on: false };
-
-    const measure = () => {
-      const w = cardsRef.current[0]?.offsetWidth;
-      if (w) spacing = w + 56;
-    };
+    let previous = -1;
 
     const update = () => {
-      tick.on = false;
-      const cards = cardsRef.current;
-      const vh = window.innerHeight;
+      frame = 0;
+      if (!deck.matches) return;
       const rect = track.getBoundingClientRect();
-      const total = rect.height - vh;
+      const stageHeight = track.firstElementChild?.clientHeight ?? window.innerHeight;
+      const total = rect.height - stageHeight;
       if (total <= 0) return;
       const progress = Math.min(1, Math.max(0, -rect.top / total));
-      const active = progress * (cards.length - 1);
+      if (progress === previous) return;
+      previous = progress;
+      const active = progress * (STEPS.length - 1);
 
-      cards.forEach((card, i) => {
+      cardsRef.current.forEach((card, i) => {
         if (!card) return;
         const offset = i - active;
         const abs = Math.min(Math.abs(offset), 3);
-        const tx = offset * spacing;
         const ry = Math.max(-48, Math.min(48, -offset * 26));
         const scale = Math.max(0.74, 1 - abs * 0.14);
-        const blur = Math.min(7, abs * 3.4);
-        const dim = Math.max(0.28, 1 - abs * 0.34);
-        card.style.transform = `translateX(${tx.toFixed(1)}px) translateZ(${(-abs * 140).toFixed(0)}px) rotateY(${ry.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
-        card.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px) brightness(${dim.toFixed(3)})` : "";
+        card.style.transform = `translate3d(${(offset * spacing).toFixed(1)}px, 0, ${(-abs * 140).toFixed(0)}px) rotateY(${ry.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
         card.style.zIndex = String(Math.round(100 - abs * 10));
-        card.style.opacity = String(Math.max(0.35, 1 - abs * 0.22));
-        // Only the card(s) near center pay for the expensive glass blur;
-        // the rest fall back to the cheap static class below. Recomputing
-        // backdrop-filter on all four every scroll frame was the main
-        // source of the slow, stuttering scroll through this section.
-        const wantsStrongBackdrop = abs < 0.5;
-        card.style.backdropFilter = wantsStrongBackdrop ? "blur(24px)" : "";
-        card.style.setProperty(
-          "-webkit-backdrop-filter",
-          wantsStrongBackdrop ? "blur(24px)" : "",
-        );
+        card.style.opacity = String(Math.max(0.2, 1 - abs * 0.3));
       });
     };
     const onScroll = () => {
-      if (!tick.on) {
-        tick.on = true;
-        requestAnimationFrame(update);
-      }
+      if (deck.matches && !frame) frame = requestAnimationFrame(update);
     };
-
-    const onResize = () => {
-      measure();
-      onScroll();
+    const measure = () => {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      previous = -1;
+      if (!deck.matches) {
+        cardsRef.current.forEach((card) => {
+          if (!card) return;
+          card.style.transform = "";
+          card.style.opacity = "";
+          card.style.zIndex = "";
+        });
+        return;
+      }
+      spacing = (cardsRef.current[0]?.offsetWidth ?? 304) + 56;
+      update();
     };
 
     measure();
-    update();
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onResize);
+    window.addEventListener("resize", measure);
+    deck.addEventListener("change", measure);
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onResize);
+      window.removeEventListener("resize", measure);
+      deck.removeEventListener("change", measure);
     };
   }, []);
 
@@ -166,12 +158,11 @@ export default function Process() {
 
       {/* horizontal, scroll-scrubbed 3D deck: fanned glass cards that pass
           through center one at a time as the page scrolls */}
-      <div ref={trackRef} className="relative mt-16 h-[380svh] sm:mt-20">
+      <div ref={trackRef} className={`${styles.track} relative mt-16 sm:mt-20`}>
         <div
-          className="sticky top-0 flex h-svh items-center justify-center overflow-hidden"
-          style={{ perspective: "1600px" }}
+          className={styles.stage}
         >
-          <ProcessBackground />
+          <div className={styles.background}><ProcessBackground /></div>
 
           {STEPS.map((s, i) => {
             const last = i === STEPS.length - 1;
@@ -182,7 +173,7 @@ export default function Process() {
                 ref={(el) => {
                   cardsRef.current[i] = el;
                 }}
-                className="absolute flex w-[280px] shrink-0 flex-col rounded-[28px] border border-white/10 bg-linear-to-b from-white/[0.1] via-white/[0.05] to-white/[0.02] p-6 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-md will-change-[transform,filter] sm:w-[400px] sm:p-7 lg:w-[500px] lg:p-8 xl:w-[560px] xl:p-9"
+                className={`${styles.card} flex w-[280px] shrink-0 flex-col rounded-[28px] border border-white/10 bg-linear-to-b from-white/[0.1] via-white/[0.05] to-white/[0.02] p-6 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] sm:w-[400px] sm:p-7 lg:w-[500px] lg:p-8 xl:w-[560px] xl:p-9`}
               >
                 <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em] text-zinc-500 sm:text-sm">
                   <span>Step {s.no}</span>
