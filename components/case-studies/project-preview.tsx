@@ -3,8 +3,15 @@ import LiveSiteImage from "@/components/case-studies/live-site-image";
 
 const screenshots: Record<
   ProjectPreviewName,
-  { src: string; alt: string; domain: string; width: number }
+  { src: string; alt: string; domain: string; width: number; height?: number }
 > = {
+  corridor: {
+    src: "/case-studies/corridor-selected-scroll.png",
+    alt: "Tandarts Corridor website: dental care and treatments",
+    domain: "tandarts-corridor.nl",
+    width: 1280,
+    height: 2195,
+  },
   atlantis: {
     src: "/case-studies/atlantis-scroll.png",
     alt: "Atlantis Wellness Centers website homepage",
@@ -55,7 +62,7 @@ export default function ProjectPreview({ preview, index }: { preview: ProjectPre
           src={screenshot.src}
           alt={screenshot.alt}
           width={screenshot.width}
-          height={3600}
+          height={screenshot.height ?? 3600}
           sizes="(max-width: 1023px) 100vw, 58vw"
           delay={index * 0.12}
         />

@@ -286,7 +286,7 @@ export default function CaseStudiesPage() {
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-8 lg:grid-cols-2 lg:items-end">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#b9ff2b]">Selected web experiences / 02—06</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#b9ff2b]">Selected web experiences / 02—{String(webProjects.length + 1).padStart(2, "0")}</p>
               <h2 id="web-experiences-title" className="mt-5 max-w-3xl text-4xl font-medium leading-[0.98] tracking-[-0.045em] sm:text-6xl">
                 Different stories.<br /><span className="text-zinc-500">One standard of craft.</span>
               </h2>
@@ -330,6 +330,42 @@ export default function CaseStudiesPage() {
                       <ul className="mt-5 flex flex-wrap gap-2" aria-label={`${project.name} services`}>
                         {project.services.map((service) => <Tag key={service}>{service}</Tag>)}
                       </ul>
+                      {project.searchPerformance && (
+                        <div className="mt-7 rounded-2xl border border-[#b9ff2b]/20 bg-[#b9ff2b]/[0.035] p-5 sm:p-6">
+                          <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[#b9ff2b]">Organic search performance</p>
+                          <figure className="mt-5">
+                            <a
+                              href={project.searchPerformance.screenshot}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={`View ${project.name} Google Search Console screenshot at full size (opens in a new tab)`}
+                              className="group/proof block overflow-hidden rounded-xl border border-white/15 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#b9ff2b]"
+                            >
+                              <Image
+                                src={project.searchPerformance.screenshot}
+                                alt="Google Search Console for mondzorgpraktijkveenendaal.nl: 12 months of web search performance, with 8.97K clicks, 643K impressions, 1.4% average CTR, and 9.8 average position."
+                                width={3024}
+                                height={1964}
+                                sizes="(max-width: 1023px) 100vw, 40vw"
+                                className="h-auto w-full"
+                              />
+                              <span className="flex min-h-11 items-center justify-between gap-3 bg-black/30 px-3 py-2 text-xs text-zinc-300 transition-colors group-hover/proof:text-[#b9ff2b]">
+                                View original screenshot <ExternalArrow className="h-4 w-4 shrink-0" />
+                              </span>
+                            </a>
+                            <figcaption className="mt-2 text-[11px] leading-5 text-zinc-400">Client-provided Google Search Console report</figcaption>
+                          </figure>
+                          <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6">
+                            {project.searchPerformance.metrics.map((metric) => (
+                              <div key={metric.label}>
+                                <dt className="text-xs text-zinc-400">{metric.label}</dt>
+                                <dd className="mt-1 text-3xl font-medium tracking-[-0.04em] text-white sm:text-4xl">{metric.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                          <p className="mt-5 border-t border-white/10 pt-4 text-[11px] leading-5 text-zinc-400">{project.searchPerformance.source}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </article>

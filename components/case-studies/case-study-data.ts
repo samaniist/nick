@@ -3,6 +3,7 @@ export type ProjectPreview =
   | "veenendaal"
   | "haveneiland"
   | "onelogy"
+  | "corridor"
   | "sepehr";
 
 export type WebProject = {
@@ -13,6 +14,11 @@ export type WebProject = {
   services: string[];
   preview: ProjectPreview;
   size: "wide" | "compact" | "full";
+  searchPerformance?: {
+    source: string;
+    screenshot: string;
+    metrics: { label: string; value: string }[];
+  };
 };
 
 export const webProjects: WebProject[] = [
@@ -45,6 +51,16 @@ export const webProjects: WebProject[] = [
     services: ["Web Design", "User Experience", "Local Positioning"],
     preview: "veenendaal",
     size: "compact",
+    searchPerformance: {
+      source: "Google Search Console · Web search · 12-month view · September 2026",
+      screenshot: "/case-studies/veenendaal-google-search-console.png",
+      metrics: [
+        { label: "Organic clicks", value: "8.97K" },
+        { label: "Search impressions", value: "643K" },
+        { label: "Average CTR", value: "1.4%" },
+        { label: "Average position", value: "9.8" },
+      ],
+    },
   },
   {
     name: "Mondzorg Haveneiland",
@@ -64,7 +80,17 @@ export const webProjects: WebProject[] = [
       "A mission-led digital experience structured to give stories, context, and purpose room to resonate.",
     services: ["Web Design", "Storytelling", "Mission-driven Experience"],
     preview: "sepehr",
-    size: "full",
+    size: "wide",
+  },
+  {
+    name: "Tandarts Corridor",
+    domain: "tandarts-corridor.nl",
+    href: "https://tandarts-corridor.nl/",
+    description:
+      "An editorial dental experience for Mondzorgpraktijk Veenendaal, pairing warm imagery and considered typography with clear paths to care and appointments.",
+    services: ["Web Design", "User Experience", "Healthcare"],
+    preview: "corridor",
+    size: "compact",
   },
 ];
 
