@@ -2,6 +2,7 @@
 
 import { Archivo_Black } from "next/font/google";
 import Image from "next/image";
+import Link from "next/link";
 
 import Magnetic from "@/components/magnetic";
 import { useInView } from "@/components/viz-hooks";
@@ -72,7 +73,7 @@ export default function Footer({ showCta = true }: { showCta?: boolean }) {
   const { ref, inView } = useInView<HTMLElement>();
 
   return (
-    <footer ref={ref} className="relative font-sans text-white">
+    <footer ref={ref} className="relative bg-black font-sans text-white">
 
       {/* CTA band */}
       {showCta && (
@@ -171,7 +172,7 @@ export default function Footer({ showCta = true }: { showCta?: boolean }) {
             <span className="hidden h-10 w-px bg-white/10 sm:block" aria-hidden="true" />
 
             <a
-              href="https://maps.google.com/?q=81549+Munich"
+              href="https://maps.google.com/?q=M%C3%BCnchen%2C+Deutschland"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-4"
@@ -196,7 +197,7 @@ export default function Footer({ showCta = true }: { showCta?: boolean }) {
                   Location
                 </span>
                 <span className="mt-0.5 block text-[15px] text-zinc-200 transition-colors group-hover:text-white">
-                  81549 Munich-Ramersdorf-Perlach
+                  München, Deutschland
                 </span>
               </span>
             </a>
@@ -206,10 +207,27 @@ export default function Footer({ showCta = true }: { showCta?: boolean }) {
 
       {/* bottom bar */}
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-8 sm:px-10">
-          <p className="text-center text-sm text-zinc-500">
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-7">
+          <p className="text-center text-sm text-zinc-500 sm:text-left">
             Copyright © 2026 Nexlytic | All rights reserved
           </p>
+          <nav
+            aria-label="Rechtliche Informationen"
+            className="flex items-center justify-center gap-2 sm:justify-end"
+          >
+            <Link
+              href="/impressum"
+              className="inline-flex min-h-11 items-center rounded-full px-4 text-sm text-zinc-400 transition-colors duration-200 hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Impressum
+            </Link>
+            <Link
+              href="/datenschutz"
+              className="inline-flex min-h-11 items-center rounded-full px-4 text-sm text-zinc-400 transition-colors duration-200 hover:bg-white/[0.05] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Datenschutz
+            </Link>
+          </nav>
         </div>
       </div>
     </footer>

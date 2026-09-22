@@ -61,10 +61,13 @@ const JSON_LD = {
   image: "https://nexlytic.de/og.png",
   email: "hello@nexlytic.de",
   telephone: "+49 176 70767725",
+  founder: {
+    "@type": "Person",
+    name: "Ali Pouryaghma",
+  },
   address: {
     "@type": "PostalAddress",
     addressLocality: "München",
-    postalCode: "81549",
     addressCountry: "DE",
   },
   areaServed: "EU",

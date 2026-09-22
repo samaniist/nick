@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 /* The contact form itself — shared between the /contact page (inside the
@@ -277,6 +278,17 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
             : "Goes straight to our inbox — we reply within one business day."}
         </p>
       </div>
+      <p className="text-xs leading-5 text-zinc-500">
+        Mit dem Absenden verarbeiten wir Ihre Angaben zur Bearbeitung Ihrer Anfrage.
+        Weitere Informationen finden Sie in unserer{" "}
+        <Link
+          href="/datenschutz#kontakt"
+          className="text-zinc-300 underline decoration-white/25 underline-offset-4 transition-colors duration-200 hover:text-white hover:decoration-white focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+        >
+          Datenschutzerklärung
+        </Link>
+        .
+      </p>
     </form>
   );
 }
