@@ -210,7 +210,11 @@ export default function KeyboardBall() {
     } catch {
       return; // no WebGL: the hero simply shows its backlight
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    // Glass (transmission) renders the scene twice per frame — keep the pixel
+    // count sane on phones and compute the refraction at reduced resolution.
+    const phone = window.matchMedia("(max-width: 767px)").matches;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, phone ? 1.5 : 1.75));
+    renderer.transmissionResolutionScale = phone ? 0.4 : 0.6;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -303,6 +307,8 @@ export default function KeyboardBall() {
       legendMat: THREE.MeshBasicMaterial;
       haloMat: THREE.MeshBasicMaterial;
       spillMat: THREE.MeshBasicMaterial;
+      slot: THREE.Group;
+      spill: THREE.Mesh;
       normal: THREE.Vector3;
       press: number;
       target: number;
@@ -366,6 +372,8 @@ export default function KeyboardBall() {
       slot.add(cap);
       globe.add(slot);
       return {
+        slot,
+        spill,
         cap,
         capMat,
         legendMat,
@@ -511,8 +519,13 @@ export default function KeyboardBall() {
         nextType = t + 0.22 + Math.random() * 0.38;
       }
 
+      // cull keys on the far side (hidden behind the core anyway): roughly
+      // halves the draw calls, which matters twice over with glass
+      tilt.getWorldQuaternion(q);
       for (let i = 0; i < keys.length; i++) {
         const k = keys[i];
+        n.copy(k.normal).applyAxisAngle(THREE.Object3D.DEFAULT_UP, spin).applyQuaternion(q);
+        k.slot.visible = n.z > -0.3;
         k.target = i === hover || t < k.until ? 1 : 0;
         const rate = k.target > k.press ? 26 : 9; // fast down, softer spring back
         k.press += (k.target - k.press) * Math.min(1, dt * rate);
@@ -521,6 +534,7 @@ export default function KeyboardBall() {
         k.capMat.emissiveIntensity = p * 0.05; // glass lit from within
         k.haloMat.opacity = HALO_IDLE + p * (1 - HALO_IDLE);
         k.spillMat.opacity = p * 0.2;
+        k.spill.visible = p > 0.01; // only drawn while a key is lit
       }
 
       renderer.render(scene, camera);
@@ -577,6 +591,11 @@ export default function KeyboardBall() {
     let prev = 0;
     const clock0 = performance.now();
     const loop = (now: number) => {
+      // cap at ~60 fps: 120 Hz screens would otherwise double the GPU work
+      if (now - prev < 15) {
+        raf = requestAnimationFrame(loop);
+        return;
+      }
       const dt = Math.min(0.05, (now - prev) / 1000);
       prev = now;
       draw((now - clock0) / 1000, dt);
@@ -596,14 +615,30 @@ export default function KeyboardBall() {
     const ro = new ResizeObserver(resize);
     ro.observe(host);
     resize();
+    /* The hero is position: sticky — later sections slide OVER it, so it
+       never leaves the viewport as far as IntersectionObserver is concerned.
+       Without the "covered" check the globe would keep rendering (glass and
+       all) underneath the whole page. */
     let visible = false;
+    let covered = false;
+    const heroSection = host.closest("section");
+    const sync = () => (visible && !covered && !document.hidden ? start() : stop());
+    const onPageScroll = () => {
+      const h = heroSection?.offsetHeight ?? window.innerHeight;
+      const c = window.scrollY > h - 8;
+      if (c !== covered) {
+        covered = c;
+        sync();
+      }
+    };
+    window.addEventListener("scroll", onPageScroll, { passive: true });
+    onPageScroll();
     const io = new IntersectionObserver(([entry]) => {
       visible = entry.isIntersecting;
-      if (visible && !document.hidden) start();
-      else stop();
+      sync();
     });
     io.observe(host);
-    const onVis = () => (document.hidden ? stop() : visible && start());
+    const onVis = () => sync();
     document.addEventListener("visibilitychange", onVis);
 
     // repaint legends once the web font is ready
@@ -628,6 +663,7 @@ export default function KeyboardBall() {
       ro.disconnect();
       io.disconnect();
       document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("scroll", onPageScroll);
       window.removeEventListener("pointermove", onWindowMove);
       host.removeEventListener("pointerdown", onDown);
       host.removeEventListener("pointermove", onCanvasMove);

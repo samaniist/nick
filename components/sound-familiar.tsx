@@ -245,12 +245,13 @@ function ZoomStat() {
   return (
     <div
       ref={trackRef}
+      data-scroll-scene
       className="relative mt-16 h-[260svh] sm:mt-20"
       style={{ marginBottom: `-${ZOOM_HANDOFF_SVH}svh` }}
     >
       <div
         ref={stageRef}
-        className="sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden bg-[#fafaf9]"
+        className="sticky top-0 flex h-lvh flex-col items-center justify-center overflow-hidden bg-[#fafaf9]"
       >
         <div
           ref={zoomRef}

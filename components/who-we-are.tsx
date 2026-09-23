@@ -10,7 +10,7 @@ import { ArrowUpRight } from "@/components/icons";
 import Magnetic from "@/components/magnetic";
 import TiltHover from "@/components/tilt-hover";
 import { useCountUp, useInView } from "@/components/viz-hooks";
-import WhoPhysics from "@/components/who-physics";
+import WhoTunnel from "@/components/who-tunnel";
 
 const signatureFont = Mrs_Saint_Delafield({ weight: "400", subsets: ["latin"], display: "swap" });
 
@@ -39,8 +39,8 @@ function Fact({ f, active, delay }: { f: (typeof FACTS)[number]; active: boolean
 }
 
 /**
- * "Who we are": the studio statement next to a pile of physical tags that
- * drop in, stack up and can be grabbed and thrown (who-physics.tsx), a row of counting facts, and a personal note from the founder
+ * "Who we are": a pinned flight through a tunnel of words in which the studio
+ * statement assembles itself (who-tunnel.tsx), a row of counting facts, and a personal note from the founder
  * with an animated signature.
  */
 export default function WhoWeAre() {
@@ -55,31 +55,15 @@ export default function WhoWeAre() {
           <span className="h-px w-8 bg-zinc-300" aria-hidden="true" />
           <span className="text-xs font-medium uppercase tracking-[0.25em] text-zinc-500">Who We Are</span>
         </div>
+      </div>
 
-        {/* statement + a pile of physical tags you can grab and throw */}
-        <div className="mt-8 grid items-end gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-14">
-          <div className={inView ? "viz-rise" : "opacity-0"} style={{ animationDelay: "80ms" }}>
-            <h2 className="text-4xl font-medium leading-[1.08] tracking-[-0.03em] sm:text-5xl lg:text-[56px]">
-              We’re a Munich-based <span className="text-zinc-400">growth studio.</span>
-            </h2>
-            <p className="mt-6 max-w-md text-lg leading-relaxed text-zinc-600">
-              We design, build and grow digital businesses — websites that convert, search visibility that compounds
-              and campaigns measured down to the last euro. No fluff. No guesswork.
-            </p>
-            <p className="mt-8 hidden items-center gap-2.5 text-xs font-medium uppercase tracking-[0.2em] text-zinc-400 sm:flex">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
-                <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11" />
-                <path d="M12 10.5V9a1.5 1.5 0 0 1 3 0v2" />
-                <path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-1.2a6 6 0 0 1-4.9-2.6L3.6 15a1.5 1.5 0 0 1 2.4-1.8L9 16" />
-              </svg>
-              Grab a tag — throw it around
-            </p>
-          </div>
-          <WhoPhysics className="h-[440px] rounded-3xl border-b border-zinc-950/10 sm:h-[480px] lg:h-[540px]" />
-        </div>
+      {/* pinned flight through a tunnel of words (who-tunnel.tsx) */}
+      <WhoTunnel />
+
+      <div className="mx-auto max-w-6xl px-6 sm:px-10">
 
         {/* facts */}
-        <div ref={factsRef} className="mt-16 grid grid-cols-3 gap-x-6 gap-y-10 sm:mt-20">
+        <div ref={factsRef} className="grid grid-cols-3 gap-x-6 gap-y-10">
           {FACTS.map((f, i) => (
             <Fact key={f.label} f={f} active={factsIn} delay={i * 110} />
           ))}

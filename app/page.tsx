@@ -4,6 +4,7 @@ import GlobeBackground from "@/components/globe-background";
 import GrowthPartner from "@/components/growth-partner";
 import Hero from "@/components/hero";
 import Process from "@/components/process";
+import ScrollCue from "@/components/scroll-cue";
 import Services from "@/components/services";
 import SoundFamiliar from "@/components/sound-familiar";
 import WhoWeAre from "@/components/who-we-are";
@@ -12,6 +13,7 @@ import WhyNexlytic from "@/components/why-nexlytic";
 export default function Home() {
   return (
     <>
+      <ScrollCue />
       <Hero />
       <WhoWeAre />
       <SoundFamiliar />

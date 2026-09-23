@@ -50,3 +50,14 @@
   transform: none !important;
   cursor: default;
 }
+
+/* word tunnel (components/who-tunnel.tsx): hidden until the script has placed
+   everything, so the statement never flashes in its landed layout first */
+.who-stage:not([data-live]) .who-field {
+  display: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .who-stage:not([data-live]) .who-sw {
+    opacity: 0;
+  }
+}

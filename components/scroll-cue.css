@@ -1,0 +1,51 @@
+/* components/scroll-cue.tsx */
+.sc-wheel {
+  animation: sc-wheel 1.6s ease-in-out infinite;
+}
+@keyframes sc-wheel {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  70% {
+    opacity: 0;
+    transform: translate(-50%, 9px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.sc-swipe {
+  animation: sc-swipe 1.6s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+}
+@keyframes sc-swipe {
+  0% {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0;
+    transform: translateY(-9px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.sc-chevron {
+  animation: sc-chevron 1.6s ease-in-out infinite;
+}
+@keyframes sc-chevron {
+  50% {
+    transform: translateY(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-wheel,
+  .sc-swipe,
+  .sc-chevron {
+    animation: none;
+  }
+}

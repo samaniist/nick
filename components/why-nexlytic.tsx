@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import "./why-nexlytic.css";
 
-import WhyParticles from "@/components/why-particles";
+import { WhyParticles } from "@/components/lazy-3d";
 import { useInView } from "@/components/viz-hooks";
 
 const STEPS = [
@@ -50,7 +50,6 @@ export default function WhyNexlytic() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const fillRef = useRef<HTMLSpanElement | null>(null);
   const [step, setStep] = useState(0);
-  const [started, setStarted] = useState(false);
 
   useEffect(() => {
     const track = trackRef.current;
@@ -64,7 +63,6 @@ export default function WhyNexlytic() {
       if (total <= 0) return;
       const p = Math.min(1, Math.max(0, -rect.top / total));
       setStep(Math.min(STEPS.length - 1, Math.floor(p * STEPS.length)));
-      setStarted(p > 0.02);
       if (fillRef.current) fillRef.current.style.transform = `scaleY(${p.toFixed(4)})`;
     };
     const onScroll = () => {
@@ -98,7 +96,7 @@ export default function WhyNexlytic() {
 
   return (
     <section ref={ref} id="why-nexlytic" className="relative z-30 bg-white font-sans text-zinc-950">
-      <div ref={trackRef} className="relative motion-safe:h-[340svh]">
+      <div ref={trackRef} data-scroll-scene className="relative motion-safe:h-[340svh]">
         <div className="top-0 flex flex-col overflow-hidden px-6 py-16 motion-safe:sticky motion-safe:h-svh sm:px-10 lg:px-14 lg:py-0">
           <div className="mx-auto grid h-full w-full max-w-7xl grid-rows-[auto_1fr_auto] gap-4 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:grid-rows-[1fr_auto_auto_1fr] lg:gap-x-12 lg:gap-y-0">
             {/* heading */}
@@ -132,18 +130,6 @@ export default function WhyNexlytic() {
                 aria-hidden="true"
               />
               <WhyParticles step={step} className="h-full min-h-[300px] w-full" />
-              {/* scroll hint before the journey starts */}
-              <span
-                className={`pointer-events-none absolute bottom-3 left-1/2 hidden -translate-x-1/2 items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-zinc-400 transition-opacity duration-500 motion-safe:flex ${
-                  started ? "opacity-0" : "opacity-100"
-                }`}
-                aria-hidden="true"
-              >
-                <span className="relative h-7 w-4 rounded-full border-[1.5px] border-zinc-400">
-                  <span className="why-wheel absolute left-1/2 top-1.5 h-1.5 w-[2px] -translate-x-1/2 rounded-full bg-zinc-400" />
-                </span>
-                Scroll to explore
-              </span>
             </div>
 
             {/* reasons */}

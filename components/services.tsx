@@ -149,7 +149,7 @@ export default function Services({ emergeFromZoom = false }: { emergeFromZoom?: 
           {SERVICES.map((s, i) => (
             <Rise key={s.title} inView={inView} delay={160 + i * 80} className="h-full">
               <TiltHover max={6} glare glareClass="rounded-xl" className="h-full">
-                <div className="group relative flex h-full flex-col rounded-xl border border-white/10 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-6 pt-8 text-center backdrop-blur-md transition-all duration-300 hover:border-white/25 hover:from-white/[0.13] hover:shadow-[0_32px_70px_-24px_rgba(0,0,0,0.85)]">
+                <div className="group relative flex h-full flex-col rounded-xl border border-white/10 bg-[#0b0b0c]/90 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-6 pt-8 text-center transition-all duration-300 hover:border-white/25 hover:from-white/[0.13] hover:shadow-[0_32px_70px_-24px_rgba(0,0,0,0.85)]">
                   <span className="card-shine rounded-xl" aria-hidden="true" />
                   {s.href && (
                     <Link

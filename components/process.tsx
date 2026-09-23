@@ -398,7 +398,7 @@ export default function Process() {
 
               {/* call to action for the wheel */}
               <div className="mt-8 flex justify-center">
-                <span className="pv-hint inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/[0.07] px-4 py-2 text-sm font-medium text-white backdrop-blur-sm">
+                <span className="pv-hint inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-zinc-900 px-4 py-2 text-sm font-medium text-white">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="pv-hint-hand h-4 w-4" aria-hidden="true">
                     <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11" />
                     <path d="M12 10.5V9a1.5 1.5 0 0 1 3 0v2" />
@@ -416,7 +416,7 @@ export default function Process() {
               id="proc-panel"
               role="tabpanel"
               aria-labelledby={`proc-tab-${active}`}
-              className="rounded-[28px] border border-white/10 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-5 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] backdrop-blur-md sm:p-8 lg:p-9"
+              className="rounded-[28px] border border-white/10 bg-[#0b0b0c]/90 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-5 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] sm:p-8 lg:p-9"
             >
               {/* key → remount: the scene replays and the copy slides in */}
               <div key={active} className="proc-panel-in">

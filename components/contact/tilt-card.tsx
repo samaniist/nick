@@ -100,7 +100,7 @@ export default function TiltCard({
     <div ref={frameRef} className="[perspective:1400px]">
       <div
         ref={cardRef}
-        className="relative rounded-3xl border border-white/10 bg-linear-to-b from-white/[0.08] via-white/[0.04] to-white/[0.02] p-7 backdrop-blur-xl will-change-transform [transform-style:preserve-3d] sm:p-9"
+        className="relative rounded-3xl border border-white/10 bg-[#0b0b0c]/85 bg-linear-to-b from-white/[0.08] via-white/[0.04] to-white/[0.02] p-7 will-change-transform [transform-style:preserve-3d] sm:p-9"
         style={{
           boxShadow:
             "0 40px 80px -24px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.12)",

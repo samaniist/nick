@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import KeyboardBall from "@/components/keyboard-ball";
+import { KeyboardBall } from "@/components/lazy-3d";
 import Magnetic from "@/components/magnetic";
 
 /* Client logos, all rendered as flat light-gray marks on transparent

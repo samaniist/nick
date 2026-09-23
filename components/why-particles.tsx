@@ -238,6 +238,278 @@ const FRAG = /* glsl */ `
   }
 `;
 
+/** Builds the scene into `host`; returns a disposer. */
+function setupParticles(
+  host: HTMLDivElement,
+  stepRef: { current: number },
+  onStepRef: { current: (s: number) => void },
+): () => void {
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const small = window.matchMedia("(max-width: 767px)").matches;
+  const N = small ? 4200 : 9000;
+
+  let renderer: THREE.WebGLRenderer;
+  try {
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  } catch {
+    return () => {};
+  }
+  const pr = Math.min(window.devicePixelRatio, small ? 1.5 : 1.75);
+  renderer.setPixelRatio(pr);
+  renderer.domElement.className = "absolute inset-0 h-full w-full";
+  host.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
+  camera.position.set(0, 0, 5);
+
+  const shapes = buildShapes(N);
+  const rnd = mulberry32(99);
+
+  // start as a wide scattered cloud; assembles into shape 0 on first view
+  const pos = new Float32Array(N * 3);
+  const vel = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) {
+    const u = rnd() * 2 - 1;
+    const a = rnd() * Math.PI * 2;
+    const s = Math.sqrt(1 - u * u);
+    const r = 2.5 + rnd() * 3;
+    pos[i * 3] = r * s * Math.cos(a);
+    pos[i * 3 + 1] = r * u;
+    pos[i * 3 + 2] = r * s * Math.sin(a);
+  }
+  const sizes = new Float32Array(N);
+  const phase = new Float32Array(N);
+  const delay = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const accent = rnd() < (small ? 0.012 : 0.025);
+    sizes[i] = accent ? (small ? 3 : 4) + rnd() * 1.5 : 1.3 + rnd() * 2;
+    phase[i] = rnd() * Math.PI * 2;
+    delay[i] = rnd() * 0.55;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  const posAttr = new THREE.BufferAttribute(pos, 3);
+  posAttr.setUsage(THREE.DynamicDrawUsage);
+  geo.setAttribute("position", posAttr);
+  geo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+  const mat = new THREE.ShaderMaterial({
+    vertexShader: VERT,
+    fragmentShader: FRAG,
+    uniforms: { uPR: { value: pr } },
+    transparent: true,
+    depthWrite: false,
+  });
+  const points = new THREE.Points(geo, mat);
+  points.frustumCulled = false;
+  const group = new THREE.Group();
+  group.add(points);
+  scene.add(group);
+
+  // morph state: each particle switches target after its own small delay
+  let cur = stepRef.current;
+  let prev = cur;
+  let switchedAt = -10;
+  let assembled = false;
+  let clockT = 0;
+
+  onStepRef.current = (s: number) => {
+    if (s === cur) return;
+    prev = cur;
+    cur = s;
+    switchedAt = clockT;
+    // swirl kick so the transition flows instead of snapping
+    for (let i = 0; i < N; i++) {
+      const x = pos[i * 3];
+      const z = pos[i * 3 + 2];
+      vel[i * 3] += -z * 0.9 + (rnd() - 0.5) * 0.6;
+      vel[i * 3 + 1] += (rnd() - 0.2) * 0.8;
+      vel[i * 3 + 2] += x * 0.9 + (rnd() - 0.5) * 0.6;
+    }
+  };
+
+  // pointer → ray in the group's local space
+  const ndc = new THREE.Vector2(9, 9);
+  const ptr = { x: 0, y: 0 };
+  const lean = { x: 0, y: 0 };
+  const ray = new THREE.Raycaster();
+  const inv = new THREE.Matrix4();
+  const o = new THREE.Vector3();
+  const dirV = new THREE.Vector3();
+  const onMove = (e: PointerEvent) => {
+    const r = host.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ptr.x = Math.max(-1, Math.min(1, ndc.x));
+    ptr.y = Math.max(-1, Math.min(1, ndc.y));
+  };
+  const onLeave = () => {
+    ndc.set(9, 9);
+    ptr.x = 0;
+    ptr.y = 0;
+  };
+  window.addEventListener("pointermove", onMove, { passive: true });
+  host.addEventListener("pointerleave", onLeave);
+
+  const resize = () => {
+    const w = host.clientWidth;
+    const h = host.clientHeight;
+    if (!w || !h) return;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    // keep the sculpture fully in frame on tall/narrow boxes
+    camera.position.z = camera.aspect < 1 ? 5 / Math.max(0.62, camera.aspect) : 5;
+    camera.updateProjectionMatrix();
+  };
+
+  const tick = (dt: number) => {
+    clockT += dt;
+    const t = clockT;
+    const shapeCur = shapes[cur];
+    const shapePrev = shapes[prev];
+
+    // running stopwatch hands (target positions for the hand particles)
+    if (shapes[3].hands) {
+      const aMin = -t * 1.1;
+      const aHour = -t * 0.09;
+      for (const h of shapes[3].hands) {
+        const a = h.hand === 0 ? aHour : aMin;
+        const L = h.hand === 0 ? 0.5 : 0.78;
+        const k = h.t * L;
+        const p = shapes[3].pos;
+        p[h.i * 3] = Math.sin(-a) * k + h.j[0];
+        p[h.i * 3 + 1] = Math.cos(-a) * k + h.j[1];
+        p[h.i * 3 + 2] = h.j[2];
+      }
+    }
+
+    // pointer ray in local space
+    let useRay = false;
+    if (ndc.x < 2) {
+      ray.setFromCamera(ndc, camera);
+      inv.copy(group.matrixWorld).invert();
+      o.copy(ray.ray.origin).applyMatrix4(inv);
+      dirV.copy(ray.ray.direction).transformDirection(inv);
+      useRay = true;
+    }
+
+    const k = assembled ? 26 : 9; // spring
+    const damp = Math.pow(assembled ? 0.86 : 0.9, dt * 60);
+    const since = t - switchedAt;
+    for (let i = 0; i < N; i++) {
+      const src = since < delay[i] ? shapePrev.pos : shapeCur.pos;
+      const breathe = Math.sin(t * 1.3 + phase[i]) * 0.012;
+      const i3 = i * 3;
+      const tx = src[i3] * (1 + breathe);
+      const ty = src[i3 + 1] * (1 + breathe);
+      const tz = src[i3 + 2] * (1 + breathe);
+      let vx = vel[i3] + (tx - pos[i3]) * k * dt;
+      let vy = vel[i3 + 1] + (ty - pos[i3 + 1]) * k * dt;
+      let vz = vel[i3 + 2] + (tz - pos[i3 + 2]) * k * dt;
+
+      if (useRay) {
+        // distance from particle to the pointer ray
+        const px = pos[i3] - o.x;
+        const py = pos[i3 + 1] - o.y;
+        const pz = pos[i3 + 2] - o.z;
+        const along = px * dirV.x + py * dirV.y + pz * dirV.z;
+        const cx = px - dirV.x * along;
+        const cy = py - dirV.y * along;
+        const cz = pz - dirV.z * along;
+        const d2 = cx * cx + cy * cy + cz * cz;
+        if (d2 < 0.16) {
+          const f = (0.16 - d2) * 28 * dt / Math.sqrt(d2 + 1e-4);
+          vx += cx * f;
+          vy += cy * f;
+          vz += cz * f;
+        }
+      }
+
+      vx *= damp;
+      vy *= damp;
+      vz *= damp;
+      vel[i3] = vx;
+      vel[i3 + 1] = vy;
+      vel[i3 + 2] = vz;
+      pos[i3] += vx * dt;
+      pos[i3 + 1] += vy * dt;
+      pos[i3 + 2] += vz * dt;
+    }
+    posAttr.needsUpdate = true;
+
+    // presentation: gentle sway + lean toward the pointer
+    lean.x += (ptr.x - lean.x) * 0.05;
+    lean.y += (ptr.y - lean.y) * 0.05;
+    const sway = cur === 2 ? 0.25 : 0.55;
+    group.rotation.y = Math.sin(t * 0.35) * sway + lean.x * 0.5;
+    group.rotation.x = -lean.y * 0.25 + Math.sin(t * 0.27) * 0.06;
+    group.updateMatrixWorld();
+    renderer.render(scene, camera);
+  };
+
+  // loop, paused off screen
+  let raf = 0;
+  let running = false;
+  let last = 0;
+  const loop = (now: number) => {
+    if (now - last < 15) {
+      raf = requestAnimationFrame(loop); // ~60 fps cap
+      return;
+    }
+    const dt = Math.min(0.033, (now - last) / 1000);
+    last = now;
+    tick(dt);
+    raf = requestAnimationFrame(loop);
+  };
+  const start = () => {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    raf = requestAnimationFrame(loop);
+  };
+  const stop = () => {
+    running = false;
+    cancelAnimationFrame(raf);
+  };
+  const io = new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) {
+      if (!assembled) window.setTimeout(() => (assembled = true), 2200);
+      if (reduced) {
+        // no motion: jump straight to the shape and draw once
+        pos.set(shapes[stepRef.current].pos);
+        posAttr.needsUpdate = true;
+        renderer.render(scene, camera);
+      } else start();
+    } else stop();
+  });
+  const ro = new ResizeObserver(() => {
+    resize();
+    if (reduced) renderer.render(scene, camera);
+  });
+  ro.observe(host);
+  io.observe(host);
+  if (reduced) {
+    onStepRef.current = (s: number) => {
+      cur = s;
+      pos.set(shapes[s].pos);
+      posAttr.needsUpdate = true;
+      renderer.render(scene, camera);
+    };
+  }
+
+  return () => {
+    stop();
+    io.disconnect();
+    ro.disconnect();
+    window.removeEventListener("pointermove", onMove);
+    host.removeEventListener("pointerleave", onLeave);
+    onStepRef.current = () => {};
+    geo.dispose();
+    mat.dispose();
+    renderer.dispose();
+    renderer.domElement.remove();
+  };
+}
+
 export default function WhyParticles({ step, className = "" }: { step: number; className?: string }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const stepRef = useRef(step);
@@ -251,265 +523,22 @@ export default function WhyParticles({ step, className = "" }: { step: number; c
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const small = window.matchMedia("(max-width: 767px)").matches;
-    const N = small ? 4200 : 9000;
-
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    } catch {
-      return;
-    }
-    const pr = Math.min(window.devicePixelRatio, 2);
-    renderer.setPixelRatio(pr);
-    renderer.domElement.className = "absolute inset-0 h-full w-full";
-    host.appendChild(renderer.domElement);
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
-    camera.position.set(0, 0, 5);
-
-    const shapes = buildShapes(N);
-    const rnd = mulberry32(99);
-
-    // start as a wide scattered cloud; assembles into shape 0 on first view
-    const pos = new Float32Array(N * 3);
-    const vel = new Float32Array(N * 3);
-    for (let i = 0; i < N; i++) {
-      const u = rnd() * 2 - 1;
-      const a = rnd() * Math.PI * 2;
-      const s = Math.sqrt(1 - u * u);
-      const r = 2.5 + rnd() * 3;
-      pos[i * 3] = r * s * Math.cos(a);
-      pos[i * 3 + 1] = r * u;
-      pos[i * 3 + 2] = r * s * Math.sin(a);
-    }
-    const sizes = new Float32Array(N);
-    const phase = new Float32Array(N);
-    const delay = new Float32Array(N);
-    for (let i = 0; i < N; i++) {
-      const accent = rnd() < (small ? 0.012 : 0.025);
-      sizes[i] = accent ? (small ? 3 : 4) + rnd() * 1.5 : 1.3 + rnd() * 2;
-      phase[i] = rnd() * Math.PI * 2;
-      delay[i] = rnd() * 0.55;
-    }
-
-    const geo = new THREE.BufferGeometry();
-    const posAttr = new THREE.BufferAttribute(pos, 3);
-    posAttr.setUsage(THREE.DynamicDrawUsage);
-    geo.setAttribute("position", posAttr);
-    geo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
-    const mat = new THREE.ShaderMaterial({
-      vertexShader: VERT,
-      fragmentShader: FRAG,
-      uniforms: { uPR: { value: pr } },
-      transparent: true,
-      depthWrite: false,
-    });
-    const points = new THREE.Points(geo, mat);
-    points.frustumCulled = false;
-    const group = new THREE.Group();
-    group.add(points);
-    scene.add(group);
-
-    // morph state: each particle switches target after its own small delay
-    let cur = stepRef.current;
-    let prev = cur;
-    let switchedAt = -10;
-    let assembled = false;
-    let clockT = 0;
-
-    onStepRef.current = (s: number) => {
-      if (s === cur) return;
-      prev = cur;
-      cur = s;
-      switchedAt = clockT;
-      // swirl kick so the transition flows instead of snapping
-      for (let i = 0; i < N; i++) {
-        const x = pos[i * 3];
-        const z = pos[i * 3 + 2];
-        vel[i * 3] += -z * 0.9 + (rnd() - 0.5) * 0.6;
-        vel[i * 3 + 1] += (rnd() - 0.2) * 0.8;
-        vel[i * 3 + 2] += x * 0.9 + (rnd() - 0.5) * 0.6;
-      }
-    };
-
-    // pointer → ray in the group's local space
-    const ndc = new THREE.Vector2(9, 9);
-    const ptr = { x: 0, y: 0 };
-    const lean = { x: 0, y: 0 };
-    const ray = new THREE.Raycaster();
-    const inv = new THREE.Matrix4();
-    const o = new THREE.Vector3();
-    const dirV = new THREE.Vector3();
-    const onMove = (e: PointerEvent) => {
-      const r = host.getBoundingClientRect();
-      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
-      ptr.x = Math.max(-1, Math.min(1, ndc.x));
-      ptr.y = Math.max(-1, Math.min(1, ndc.y));
-    };
-    const onLeave = () => {
-      ndc.set(9, 9);
-      ptr.x = 0;
-      ptr.y = 0;
-    };
-    window.addEventListener("pointermove", onMove, { passive: true });
-    host.addEventListener("pointerleave", onLeave);
-
-    const resize = () => {
-      const w = host.clientWidth;
-      const h = host.clientHeight;
-      if (!w || !h) return;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      // keep the sculpture fully in frame on tall/narrow boxes
-      camera.position.z = camera.aspect < 1 ? 5 / Math.max(0.62, camera.aspect) : 5;
-      camera.updateProjectionMatrix();
-    };
-
-    const tick = (dt: number) => {
-      clockT += dt;
-      const t = clockT;
-      const shapeCur = shapes[cur];
-      const shapePrev = shapes[prev];
-
-      // running stopwatch hands (target positions for the hand particles)
-      if (shapes[3].hands) {
-        const aMin = -t * 1.1;
-        const aHour = -t * 0.09;
-        for (const h of shapes[3].hands) {
-          const a = h.hand === 0 ? aHour : aMin;
-          const L = h.hand === 0 ? 0.5 : 0.78;
-          const k = h.t * L;
-          const p = shapes[3].pos;
-          p[h.i * 3] = Math.sin(-a) * k + h.j[0];
-          p[h.i * 3 + 1] = Math.cos(-a) * k + h.j[1];
-          p[h.i * 3 + 2] = h.j[2];
+    /* Build lazily: generating the shapes and compiling the shader is only
+       worth doing once the visitor is getting close to this section. */
+    let dispose: (() => void) | undefined;
+    const near = new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting && !dispose) {
+          near.disconnect();
+          dispose = setupParticles(host, stepRef, onStepRef);
         }
-      }
-
-      // pointer ray in local space
-      let useRay = false;
-      if (ndc.x < 2) {
-        ray.setFromCamera(ndc, camera);
-        inv.copy(group.matrixWorld).invert();
-        o.copy(ray.ray.origin).applyMatrix4(inv);
-        dirV.copy(ray.ray.direction).transformDirection(inv);
-        useRay = true;
-      }
-
-      const k = assembled ? 26 : 9; // spring
-      const damp = Math.pow(assembled ? 0.86 : 0.9, dt * 60);
-      const since = t - switchedAt;
-      for (let i = 0; i < N; i++) {
-        const src = since < delay[i] ? shapePrev.pos : shapeCur.pos;
-        const breathe = Math.sin(t * 1.3 + phase[i]) * 0.012;
-        const i3 = i * 3;
-        const tx = src[i3] * (1 + breathe);
-        const ty = src[i3 + 1] * (1 + breathe);
-        const tz = src[i3 + 2] * (1 + breathe);
-        let vx = vel[i3] + (tx - pos[i3]) * k * dt;
-        let vy = vel[i3 + 1] + (ty - pos[i3 + 1]) * k * dt;
-        let vz = vel[i3 + 2] + (tz - pos[i3 + 2]) * k * dt;
-
-        if (useRay) {
-          // distance from particle to the pointer ray
-          const px = pos[i3] - o.x;
-          const py = pos[i3 + 1] - o.y;
-          const pz = pos[i3 + 2] - o.z;
-          const along = px * dirV.x + py * dirV.y + pz * dirV.z;
-          const cx = px - dirV.x * along;
-          const cy = py - dirV.y * along;
-          const cz = pz - dirV.z * along;
-          const d2 = cx * cx + cy * cy + cz * cz;
-          if (d2 < 0.16) {
-            const f = (0.16 - d2) * 28 * dt / Math.sqrt(d2 + 1e-4);
-            vx += cx * f;
-            vy += cy * f;
-            vz += cz * f;
-          }
-        }
-
-        vx *= damp;
-        vy *= damp;
-        vz *= damp;
-        vel[i3] = vx;
-        vel[i3 + 1] = vy;
-        vel[i3 + 2] = vz;
-        pos[i3] += vx * dt;
-        pos[i3 + 1] += vy * dt;
-        pos[i3 + 2] += vz * dt;
-      }
-      posAttr.needsUpdate = true;
-
-      // presentation: gentle sway + lean toward the pointer
-      lean.x += (ptr.x - lean.x) * 0.05;
-      lean.y += (ptr.y - lean.y) * 0.05;
-      const sway = cur === 2 ? 0.25 : 0.55;
-      group.rotation.y = Math.sin(t * 0.35) * sway + lean.x * 0.5;
-      group.rotation.x = -lean.y * 0.25 + Math.sin(t * 0.27) * 0.06;
-      group.updateMatrixWorld();
-      renderer.render(scene, camera);
-    };
-
-    // loop, paused off screen
-    let raf = 0;
-    let running = false;
-    let last = 0;
-    const loop = (now: number) => {
-      const dt = Math.min(0.033, (now - last) / 1000);
-      last = now;
-      tick(dt);
-      raf = requestAnimationFrame(loop);
-    };
-    const start = () => {
-      if (running) return;
-      running = true;
-      last = performance.now();
-      raf = requestAnimationFrame(loop);
-    };
-    const stop = () => {
-      running = false;
-      cancelAnimationFrame(raf);
-    };
-    const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) {
-        if (!assembled) window.setTimeout(() => (assembled = true), 2200);
-        if (reduced) {
-          // no motion: jump straight to the shape and draw once
-          pos.set(shapes[stepRef.current].pos);
-          posAttr.needsUpdate = true;
-          renderer.render(scene, camera);
-        } else start();
-      } else stop();
-    });
-    const ro = new ResizeObserver(() => {
-      resize();
-      if (reduced) renderer.render(scene, camera);
-    });
-    ro.observe(host);
-    io.observe(host);
-    if (reduced) {
-      onStepRef.current = (s: number) => {
-        cur = s;
-        pos.set(shapes[s].pos);
-        posAttr.needsUpdate = true;
-        renderer.render(scene, camera);
-      };
-    }
-
+      },
+      { rootMargin: "900px 0px" },
+    );
+    near.observe(host);
     return () => {
-      stop();
-      io.disconnect();
-      ro.disconnect();
-      window.removeEventListener("pointermove", onMove);
-      host.removeEventListener("pointerleave", onLeave);
-      onStepRef.current = () => {};
-      geo.dispose();
-      mat.dispose();
-      renderer.dispose();
-      renderer.domElement.remove();
+      near.disconnect();
+      dispose?.();
     };
   }, []);
 
