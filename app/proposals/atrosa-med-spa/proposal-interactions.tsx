@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./proposal.module.css";
+import { Stars } from "@/components/icons";
 
 const findings = [
   {
@@ -313,7 +314,7 @@ export function LocalSearch() {
           <span className={styles.sponsoredLabel}>Local result · example</span>
           <h3>Atrosa Med Spa</h3>
           <div className={styles.stars} aria-label="Illustrative review display">
-            <span aria-hidden="true">★★★★★</span> Reviews
+            <Stars /> Reviews
           </div>
           <p>Advanced skincare and aesthetic treatments in Vienna, Virginia.</p>
           <div className={styles.resultActions}>

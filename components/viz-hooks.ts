@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 
-export function useInView<T extends HTMLElement>() {
+export function useInView<T extends HTMLElement>(
+  options: IntersectionObserverInit = { threshold: 0.1 },
+) {
   const ref = useRef<T | null>(null);
+  const { threshold, rootMargin } = options;
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
@@ -15,11 +18,11 @@ export function useInView<T extends HTMLElement>() {
           io.disconnect();
         }
       },
-      { threshold: 0.1 },
+      { threshold, rootMargin },
     );
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+  }, [threshold, rootMargin]);
   return { ref, inView };
 }
 

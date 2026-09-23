@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { ArrowUpRight, Mail } from "@/components/icons";
 
 /* Glass card with pointer-tracking 3D tilt, glare and floating neon
    glyphs — shared by the /contact page and the homepage contact section. */
@@ -8,13 +9,20 @@ import { useEffect, useRef } from "react";
 /* Neon glyphs floating around the card at different 3D depths. */
 const GLYPHS = [
   { sym: "@", cls: "-left-10 top-6 text-4xl", z: 90, delay: 0 },
-  { sym: "✉", cls: "-right-7 top-1/4 text-3xl", z: 120, delay: 1200 },
+  { sym: <Mail strokeWidth={1.8} />, cls: "-right-7 top-1/4 text-3xl", z: 120, delay: 1200 },
   { sym: "{ }", cls: "-left-14 bottom-1/4 text-2xl", z: 70, delay: 2400 },
-  { sym: "↗", cls: "-right-10 bottom-10 text-4xl", z: 100, delay: 600 },
+  { sym: <ArrowUpRight strokeWidth={1.8} />, cls: "-right-10 bottom-10 text-4xl", z: 100, delay: 600 },
   { sym: "+49", cls: "left-1/4 -top-9 text-xl", z: 110, delay: 1800 },
 ];
 
-export default function TiltCard({ children }: { children: React.ReactNode }) {
+export default function TiltCard({
+  children,
+  glyphs = true,
+}: {
+  children: React.ReactNode;
+  /** floating neon glyphs around the card (off on the homepage, where the hero already uses them) */
+  glyphs?: boolean;
+}) {
   const frameRef = useRef<HTMLDivElement | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
@@ -108,9 +116,9 @@ export default function TiltCard({ children }: { children: React.ReactNode }) {
           }}
         />
         {/* floating neon glyphs, each on its own depth plane */}
-        {GLYPHS.map((g) => (
+        {glyphs && GLYPHS.map((g, i) => (
           <span
-            key={g.sym}
+            key={i}
             aria-hidden
             className={`viz-float pointer-events-none absolute hidden select-none font-semibold text-white lg:block ${g.cls}`}
             style={{
@@ -118,6 +126,8 @@ export default function TiltCard({ children }: { children: React.ReactNode }) {
               animationDelay: `${g.delay}ms`,
               textShadow:
                 "0 0 6px rgba(255,255,255,0.9), 0 0 18px rgba(255,255,255,0.5), 0 0 40px rgba(255,255,255,0.25)",
+              // SVG glyphs ignore text-shadow; give them the same glow
+              filter: typeof g.sym === "string" ? undefined : "drop-shadow(0 0 6px rgba(255,255,255,0.9))",
             }}
           >
             {g.sym}

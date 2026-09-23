@@ -70,7 +70,9 @@ export default function ProcessBackground() {
       // planet limb: a huge circle whose top arc just breaks the horizon
       const R = w * 0.92;
       const cx = w / 2 + cur.x * 14;
-      const cy = h * 0.86 + R * 0.62 + cur.y * 8;
+      // the arc's crest sits near the bottom so it frames the section
+      // instead of cutting through the process wheel and panel
+      const cy = h * 0.93 + R + cur.y * 8;
 
       ctx.save();
       ctx.beginPath();

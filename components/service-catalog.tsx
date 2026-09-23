@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 
 import { useInView } from "@/components/viz-hooks";
+import { ArrowDown, ArrowUp, ArrowUpRight, Check } from "@/components/icons";
 
 function Icon({ children }: { children: React.ReactNode }) {
   return (
@@ -107,8 +108,8 @@ function WebdesignViz() {
             convert visitors.
           </p>
           <div className="mt-2.5 flex items-center gap-1.5">
-            <span className="svc-press rounded-full bg-white px-2.5 py-1 text-[7px] font-bold text-zinc-950">
-              Start a project ↗
+            <span className="svc-press inline-flex items-center gap-0.5 rounded-full bg-white px-2.5 py-1 text-[7px] font-bold text-zinc-950">
+              Start a project <ArrowUpRight className="h-2 w-2" />
             </span>
             <span className="rounded-full border border-white/30 px-2.5 py-1 text-[7px] text-white/80">
               See work
@@ -181,8 +182,8 @@ function WebdesignViz() {
         <span className="text-[8px] font-semibold text-zinc-600">PageSpeed</span>
       </div>
 
-      <span className="svc-pop absolute right-[26%] top-0 z-10 rounded-full bg-zinc-950 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg" style={{ animationDelay: "2.2s" }}>
-        Site live ↗
+      <span className="svc-pop absolute right-[26%] top-0 z-10 inline-flex items-center gap-1 rounded-full bg-zinc-950 px-2.5 py-1 text-[10px] font-semibold text-white shadow-lg" style={{ animationDelay: "2.2s" }}>
+        Site live <ArrowUpRight className="h-3 w-3" />
       </span>
       <Cursor className="left-[46%] top-[52%]" />
     </div>
@@ -469,14 +470,16 @@ function AmazonViz() {
         </div>
         <div className="grid grid-cols-3 gap-2">
           {[
-            { l: "Sales", v: "€98,760", d: "↑ 14%" },
-            { l: "Orders", v: "2,489", d: "↑ 9%" },
-            { l: "ACOS", v: "22.4%", d: "↓ 3%" },
+            { l: "Sales", v: "€98,760", up: true, d: "14%" },
+            { l: "Orders", v: "2,489", up: true, d: "9%" },
+            { l: "ACOS", v: "22.4%", up: false, d: "3%" },
           ].map((s) => (
             <div key={s.l} className="rounded-lg border border-zinc-950/10 p-2">
               <div className="text-[9px] text-zinc-500">{s.l}</div>
               <div className="text-[13px] font-semibold tabular-nums">{s.v}</div>
-              <div className="text-[9px] font-medium text-zinc-950">{s.d}</div>
+              <div className="flex items-center gap-0.5 text-[9px] font-medium text-zinc-950">
+                {s.up ? <ArrowUp className="h-2.5 w-2.5" /> : <ArrowDown className="h-2.5 w-2.5" />} {s.d}
+              </div>
             </div>
           ))}
         </div>
@@ -580,7 +583,7 @@ function ShopifyViz() {
         </div>
         <div className="mt-2.5 flex items-center justify-between rounded-lg bg-zinc-950 px-3 py-2 text-white">
           <span className="text-[9px] text-zinc-400">Conversion rate</span>
-          <span className="text-[11px] font-semibold tabular-nums">3.9% ↑</span>
+          <span className="inline-flex items-center gap-0.5 text-[11px] font-semibold tabular-nums">3.9% <ArrowUp className="h-3 w-3" /></span>
         </div>
       </Window>
     </div>
@@ -664,8 +667,8 @@ function ShopwareViz() {
             </div>
           ))}
         </div>
-        <span className="svc-pop mt-2.5 block w-max rounded-full bg-zinc-950 px-2.5 py-1 text-[9px] font-semibold text-white">
-          Storefront deployed ✓
+        <span className="svc-pop mt-2.5 flex w-max items-center gap-1 rounded-full bg-zinc-950 px-2.5 py-1 text-[9px] font-semibold text-white">
+          Storefront deployed <Check className="h-3 w-3" />
         </span>
       </Window>
     </div>
@@ -1028,7 +1031,7 @@ function SlideDeck({
   );
 }
 
-export default function ServiceCatalog() {
+export default function ServiceCatalog({ headingAs: Heading = "h2" }: { headingAs?: "h1" | "h2" }) {
   const sectionRef = useRef<HTMLElement | null>(null);
   const { ref: headRef, inView } = useInView<HTMLDivElement>();
 
@@ -1089,10 +1092,10 @@ export default function ServiceCatalog() {
           </div>
         </Rise>
         <Rise inView={inView} delay={80}>
-          <h2 className="mx-auto mt-5 max-w-3xl text-center text-4xl font-medium leading-[1.12] tracking-[-0.02em] sm:text-5xl">
+          <Heading className="mx-auto mt-5 max-w-3xl text-center text-4xl font-medium leading-[1.12] tracking-[-0.02em] sm:text-5xl">
             <span className="text-zinc-400">We are more than a service provider.</span>{" "}
             We are your growth partner.
-          </h2>
+          </Heading>
         </Rise>
         <Rise inView={inView} delay={160}>
           <p className="mx-auto mt-5 max-w-xl text-center text-base text-zinc-500 sm:text-lg">
@@ -1101,8 +1104,13 @@ export default function ServiceCatalog() {
         </Rise>
       </div>
 
-      <SlideDeck no="01" title="IT & Digital Services" count={21} services={IT_SERVICES} />
-      <SlideDeck no="02" title="E-Commerce" count={14} services={ECOM_SERVICES} fromLeft />
+      {/* anchors for the homepage service cards */}
+      <div id="it-digital" className="scroll-mt-4">
+        <SlideDeck no="01" title="IT & Digital Services" count={21} services={IT_SERVICES} />
+      </div>
+      <div id="e-commerce" className="scroll-mt-4">
+        <SlideDeck no="02" title="E-Commerce" count={14} services={ECOM_SERVICES} fromLeft />
+      </div>
     </section>
   );
 }

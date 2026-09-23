@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import Magnetic from "@/components/magnetic";
 import { useInView } from "@/components/viz-hooks";
+import { ArrowUpRight } from "@/components/icons";
 
 const archivoBlack = Archivo_Black({ weight: "400", subsets: ["latin"] });
 
@@ -63,7 +64,7 @@ function SpinBadge() {
         className="absolute inset-0 m-auto flex h-16 w-16 items-center justify-center rounded-full border border-white/15 text-2xl text-white transition-all duration-300 group-hover:bg-white group-hover:text-black"
         aria-hidden="true"
       >
-        ↗
+        <ArrowUpRight className="h-6 w-6" />
       </span>
     </a>
   );

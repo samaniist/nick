@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ArrowUpRight } from "@/components/icons";
 
 /* The contact form itself — shared between the /contact page (inside the
    3D tilt card) and the homepage contact section. Submits to
@@ -17,7 +18,7 @@ function FieldError({ id, msg }: { id: string; msg: string }) {
 }
 
 const inputCls =
-  "w-full min-h-[44px] rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 text-[15px] text-white placeholder:text-zinc-600 outline-none transition-all duration-200 focus:border-white/40 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(255,255,255,0.08)]";
+  "w-full min-h-[44px] rounded-lg border border-white/20 bg-white/[0.06] px-4 py-3 text-[15px] text-white placeholder:text-zinc-500 outline-none transition-all duration-200 focus:border-white/40 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(255,255,255,0.08)]";
 
 /* Submit button. Deliberately NO transform animations: inside the tilt
    card's preserve-3d context, a hover/press scale transition makes
@@ -270,7 +271,13 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
 
       <div className="flex flex-col items-start gap-4 pt-1 sm:flex-row sm:items-center sm:justify-between">
         <SubmitButton disabled={status === "sending"}>
-          {status === "sending" ? "Sending…" : "Send message ↗"}
+          {status === "sending" ? (
+            "Sending…"
+          ) : (
+            <>
+              Send message <ArrowUpRight className="ml-1 h-4 w-4" />
+            </>
+          )}
         </SubmitButton>
         <p className="text-[13px] text-zinc-500" role="status" aria-live="polite">
           {status === "sending"

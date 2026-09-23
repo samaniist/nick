@@ -1,0 +1,42 @@
+/* "Why Nexlytic?" section (components/why-nexlytic.tsx) */
+.why-num {
+  animation: why-num 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes why-num {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96);
+  }
+}
+.why-in {
+  animation: why-in 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes why-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.why-wheel {
+  animation: why-wheel 1.6s ease-in-out infinite;
+}
+@keyframes why-wheel {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  70% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .why-num,
+  .why-in,
+  .why-wheel {
+    animation: none;
+  }
+}

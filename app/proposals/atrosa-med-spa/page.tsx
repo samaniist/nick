@@ -11,6 +11,7 @@ import {
   WebsiteConcept,
 } from "./proposal-interactions";
 import styles from "./proposal.module.css";
+import { ArrowUpRight } from "@/components/icons";
 
 const serif = Cormorant_Garamond({
   subsets: ["latin"],
@@ -548,7 +549,7 @@ export default function AtrosaProposalPage() {
               </a>
               <a href="https://nexlytic.de/contact">
                 <span>Contact</span>
-                Start the conversation <i aria-hidden="true">↗</i>
+                Start the conversation <ArrowUpRight className="h-[1em] w-[1em]" />
               </a>
             </div>
 

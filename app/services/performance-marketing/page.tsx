@@ -7,6 +7,7 @@ import PerformanceField from "@/components/performance-marketing/performance-fie
 import ScrollFunnel from "@/components/performance-marketing/scroll-funnel";
 import Magnetic from "@/components/magnetic";
 import TiltHover from "@/components/tilt-hover";
+import { ArrowDown, ArrowRight } from "@/components/icons";
 
 export const metadata: Metadata = {
   title: "Performance Marketing",
@@ -58,7 +59,7 @@ function CapabilityVisual({ number }: { number: string }) {
       <div className="relative mt-9 h-20 overflow-hidden border-y border-black/10" aria-hidden="true">
         {[15, 38, 64, 87].map((left, index) => <span key={left} className={`absolute top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full border border-black/30 bg-[#f1f0ea] transition-all duration-500 group-hover:border-[#65733e] group-hover:bg-[#b9ff2b]`} style={{ left: `${left}%`, transitionDelay: `${index * 70}ms` }} />)}
         <span className="absolute left-[16%] right-[12%] top-1/2 h-px origin-left scale-x-0 bg-black/20 transition-transform duration-700 group-hover:scale-x-100" />
-        <span className="absolute right-0 top-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">Intent → action</span>
+        <span className="absolute right-0 top-2 font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">Intent <ArrowRight className="mx-0.5 h-2.5 w-2.5" /> action</span>
       </div>
     );
   }
@@ -83,7 +84,7 @@ function CapabilityVisual({ number }: { number: string }) {
       <span className="absolute left-[8%] top-[24%] h-7 w-7 rounded-full bg-black/8 transition-transform duration-500 group-hover:translate-x-12 group-hover:translate-y-5" />
       <span className="absolute left-[34%] top-[52%] h-5 w-5 rounded-full bg-black/12 transition-transform duration-500 group-hover:translate-x-8 group-hover:-translate-y-4" />
       <span className="absolute right-[7%] top-1/2 flex h-10 w-28 -translate-y-1/2 items-center justify-center rounded-full bg-black text-[9px] font-semibold uppercase tracking-[0.14em] text-white transition-colors duration-300 group-hover:bg-[#b9ff2b] group-hover:text-black">Convert</span>
-      <span className="absolute right-[28%] top-[8%] font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">Friction ↓</span>
+      <span className="absolute right-[28%] top-[8%] font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">Friction <ArrowDown className="h-2.5 w-2.5" /></span>
     </div>
   );
 }
@@ -260,7 +261,15 @@ export default function PerformanceMarketingPage() {
             <h2 className="mt-5 text-4xl font-medium leading-[1.03] tracking-[-0.04em] sm:text-6xl">See the signal.<br /><span className="text-zinc-500">Cut the noise.</span></h2>
             <p className="mt-6 max-w-md text-base leading-7 text-zinc-400">A reporting layer should answer the next business question—not bury it under twenty charts.</p>
             <div className="mt-9 flex flex-wrap gap-2">
-              {["Spend → revenue", "Channel clarity", "Weekly decisions"].map((item) => <span key={item} className="rounded-full border border-white/12 bg-white/[0.03] px-3 py-2 text-xs text-zinc-300">{item}</span>)}
+              {[
+                <>Spend <ArrowRight className="mx-0.5 h-3 w-3" /> revenue</>,
+                "Channel clarity",
+                "Weekly decisions",
+              ].map((item, i) => (
+                <span key={i} className="inline-flex items-center rounded-full border border-white/12 bg-white/[0.03] px-3 py-2 text-xs text-zinc-300">
+                  {item}
+                </span>
+              ))}
             </div>
           </div>
           <TiltHover max={5} glare glareClass="rounded-[28px]" className="w-full">

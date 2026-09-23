@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import ContactForm from "@/components/contact/contact-form";
 import TiltCard from "@/components/contact/tilt-card";
+import { ArrowLeft } from "@/components/icons";
 
 /* ————— shared bits ————— */
 
@@ -66,9 +67,9 @@ export default function ContactExperience() {
         </Link>
         <Link
           href="/"
-          className="text-[15px] text-zinc-400 transition-colors hover:text-white"
+          className="inline-flex items-center gap-2 text-[15px] text-zinc-400 transition-colors hover:text-white"
         >
-          ← Back to home
+          <ArrowLeft className="h-4 w-4" /> Back to home
         </Link>
       </header>
 

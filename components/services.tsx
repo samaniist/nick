@@ -2,10 +2,13 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 
 import NodesBackground from "@/components/nodes-background";
+import { ZOOM_HANDOFF_SVH, ZOOM_REVEAL_AT } from "@/components/sound-familiar";
 import TiltHover from "@/components/tilt-hover";
 import { useInView } from "@/components/viz-hooks";
+import { ArrowUpRight } from "@/components/icons";
 
 const SERVICES = [
   {
@@ -62,16 +65,69 @@ function Rise({
   );
 }
 
-export default function Services() {
-  const { ref, inView } = useInView<HTMLElement>();
+/**
+ * `emergeFromZoom`: this section follows the "+20" zoom (sound-familiar.tsx)
+ * and overlaps its pinned stage by ZOOM_HANDOFF_SVH. Its top part is then
+ * transparent (the stage behind is black by the time it matters) and the
+ * whole content layer is gated by scroll position — hidden while the zoom is
+ * still running, faded in the moment the black fill completes (when this
+ * section's top reaches ZOOM_REVEAL_AT of the viewport). Scroll-linked, so it
+ * also hides again when scrolling back up into the zoom.
+ */
+export default function Services({ emergeFromZoom = false }: { emergeFromZoom?: boolean }) {
+  const { ref, inView } = useInView<HTMLElement>(
+    emergeFromZoom
+      ? { threshold: 0, rootMargin: `0px 0px -${100 - ZOOM_REVEAL_AT * 100}% 0px` }
+      : { threshold: 0 },
+  );
+  const gateRef = useRef<HTMLDivElement | null>(null);
+  const handoff = `${ZOOM_HANDOFF_SVH}svh`;
+
+  useEffect(() => {
+    if (!emergeFromZoom) return;
+    const section = ref.current;
+    const gate = gateRef.current;
+    if (!section || !gate) return;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const vh = window.innerHeight;
+      const top = section.getBoundingClientRect().top;
+      // 0 while the top is below (REVEAL_AT + 6%) of the viewport, 1 at REVEAL_AT
+      const o = Math.min(1, Math.max(0, ((ZOOM_REVEAL_AT + 0.06) * vh - top) / (0.06 * vh)));
+      gate.style.opacity = o.toFixed(3);
+      gate.style.visibility = o === 0 ? "hidden" : "visible";
+    };
+    const onScroll = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [emergeFromZoom, ref]);
 
   return (
     <section
       ref={ref}
       id="services"
-      className="relative z-30 overflow-hidden bg-black py-20 font-sans text-white sm:py-24"
+      className={`relative z-30 overflow-hidden font-sans text-white ${emergeFromZoom ? "" : "bg-black"}`}
+      style={
+        emergeFromZoom
+          ? { background: `linear-gradient(to bottom, transparent ${handoff}, #000 ${handoff})` }
+          : undefined
+      }
     >
-      <NodesBackground />
+      {/* content gate (see above); the node canvas lives inside it so its
+          pointer listeners (attached to its parent) still cover the section */}
+      <div ref={gateRef} className="relative py-20 sm:py-24">
+        <NodesBackground />
 
       <div className="relative z-10 px-6 sm:px-10 lg:px-14">
         <Rise inView={inView} delay={0}>
@@ -107,8 +163,8 @@ export default function Services() {
                     {s.text}
                   </p>
                   {s.href && (
-                    <span className="mt-4 text-xs font-medium uppercase tracking-[0.16em] text-white/70 transition-colors group-hover:text-white">
-                      Explore service ↗
+                    <span className="mt-4 inline-flex items-center justify-center gap-1.5 text-xs font-medium uppercase tracking-[0.16em] text-white/70 transition-colors group-hover:text-white">
+                      Explore service <ArrowUpRight className="h-3 w-3" />
                     </span>
                   )}
                   <div className="mt-auto pt-6">
@@ -125,6 +181,16 @@ export default function Services() {
             </Rise>
           ))}
         </div>
+
+        <Rise inView={inView} delay={700} className="mt-12 flex justify-center">
+          <Link
+            href="/services"
+            className="inline-flex items-center gap-2 rounded-[3px] border border-white/20 px-6 py-3 text-[15px] font-medium text-white transition-colors hover:border-white/40 hover:bg-white/[0.06] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+          >
+            View all services <ArrowUpRight className="h-4 w-4" />
+          </Link>
+        </Rise>
+      </div>
       </div>
     </section>
   );

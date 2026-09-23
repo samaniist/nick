@@ -2,12 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import "./growth-partner.css";
 
 import Magnetic from "@/components/magnetic";
 import NodesBackground from "@/components/nodes-background";
 import TiltHover from "@/components/tilt-hover";
-import { useInView } from "@/components/viz-hooks";
+import { useCountUp, useInView } from "@/components/viz-hooks";
+import { ArrowDown, ArrowUp } from "@/components/icons";
 
 /* Catmull-Rom → bézier, for the small monochrome chart card. */
 function smoothPath(pts: { x: number; y: number }[]) {
@@ -35,34 +38,88 @@ function chartPoints(vals: number[], w: number, h: number, pad: number) {
 const PRODUCT = [30, 46, 38, 62, 55, 74, 84];
 const COMPETITOR = [42, 36, 52, 44, 60, 53, 62];
 const MONTHS = ["May", "Jun", "Jul", "Aug", "Sep", "Oct"];
+const nf = new Intl.NumberFormat("en-US");
 
-function ChartCard() {
+/* Where "Your business" overtakes the competitor for good: the last sign
+   change of (product − competitor), linearly interpolated between samples.
+   Returned as a 0–1 fraction of the series (x) for positioning the badge. */
+const OVERTAKE = (() => {
+  let at = 0;
+  for (let i = 1; i < PRODUCT.length; i++) {
+    const d0 = PRODUCT[i - 1] - COMPETITOR[i - 1];
+    const d1 = PRODUCT[i] - COMPETITOR[i];
+    if (d0 < 0 && d1 >= 0) at = i - 1 + -d0 / (d1 - d0);
+  }
+  return at / (PRODUCT.length - 1);
+})();
+
+const DRAW_MS = 1800; // must match .gp-draw in growth-partner.css
+const DRAW_DELAY_MS = 450;
+
+/* Chart card: the competitor line fades in, then "Your business" draws
+   itself across it; an "Overtaking" tag pops at the crossing; the live end
+   point keeps pulsing and the visitor counter ticks up. */
+function ChartCard({ active, live, visitors }: { active: boolean; live: boolean; visitors: number }) {
   const W = 240;
   const H = 104;
   const product = chartPoints(PRODUCT, W, H, 10);
   const competitor = chartPoints(COMPETITOR, W, H, 10);
   const last = product[product.length - 1];
+  const shown = useCountUp(visitors, active, 900);
+  const crossX = 10 + OVERTAKE * (W - 20);
   return (
     <div className="rounded-lg bg-white p-4 text-zinc-950 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]">
       <div className="flex items-center gap-4 text-[11px] text-zinc-500">
         <span className="flex items-center gap-1.5">
-          <span className="h-0.5 w-3 rounded-full bg-zinc-950" /> My Product
+          <span className="h-0.5 w-3 rounded-full bg-zinc-950" /> Your business
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-0 w-3 border-t-2 border-dashed border-zinc-400" /> Competitor
         </span>
-        <span className="ml-auto rounded-[3px] bg-zinc-950 px-1.5 py-0.5 text-[10px] font-semibold text-white tabular-nums">
-          820
+        <span className="ml-auto flex items-center gap-1.5 rounded-[3px] bg-zinc-950 px-1.5 py-0.5 text-[10px] font-semibold text-white tabular-nums">
+          <span className={`h-1.5 w-1.5 rounded-full bg-white ${live ? "gp-blink" : ""}`} aria-hidden="true" />
+          {nf.format(active ? shown : visitors)}
         </span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-2 block h-auto w-full" aria-hidden="true">
-        {[0.25, 0.5, 0.75].map((f) => (
-          <line key={f} x1="10" x2={W - 10} y1={H * f} y2={H * f} stroke="#f0f0ee" strokeWidth="1" />
-        ))}
-        <path d={smoothPath(competitor)} fill="none" stroke="#a1a1aa" strokeWidth="1.5" strokeDasharray="4 4" />
-        <path d={smoothPath(product)} fill="none" stroke="#18181b" strokeWidth="2" strokeLinecap="round" />
-        <circle cx={last.x} cy={last.y} r="4" fill="#18181b" stroke="#ffffff" strokeWidth="2" />
-      </svg>
+      <div className="relative mt-2">
+        <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full overflow-visible" aria-hidden="true">
+          {[0.25, 0.5, 0.75].map((f) => (
+            <line key={f} x1="10" x2={W - 10} y1={H * f} y2={H * f} stroke="#f0f0ee" strokeWidth="1" />
+          ))}
+          <path
+            d={smoothPath(competitor)}
+            fill="none"
+            stroke="#a1a1aa"
+            strokeWidth="1.5"
+            strokeDasharray="4 4"
+            className={active ? "gp-fade" : "opacity-0"}
+          />
+          <path
+            d={smoothPath(product)}
+            fill="none"
+            stroke="#18181b"
+            strokeWidth="2"
+            strokeLinecap="round"
+            pathLength={1}
+            className={active ? "gp-draw" : "gp-undrawn"}
+            style={{ animationDelay: `${DRAW_DELAY_MS}ms` }}
+          />
+          {/* live end point */}
+          <g className={active ? "gp-pop" : "opacity-0"} style={{ animationDelay: `${DRAW_DELAY_MS + DRAW_MS - 100}ms` }}>
+            {live && <circle cx={last.x} cy={last.y} r="4" fill="none" stroke="#18181b" className="gp-ping" />}
+            <circle cx={last.x} cy={last.y} r="4" fill="#18181b" stroke="#ffffff" strokeWidth="2" />
+          </g>
+        </svg>
+        {/* "Overtaking" tag at the crossing, timed to the line reaching it */}
+        <span
+          className={`absolute -top-1 flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-full bg-zinc-950 px-2 py-0.5 text-[9px] font-semibold text-white ${
+            active ? "gp-pop" : "opacity-0"
+          }`}
+          style={{ left: `${(crossX / W) * 100}%`, animationDelay: `${DRAW_DELAY_MS + OVERTAKE * DRAW_MS}ms` }}
+        >
+          <ArrowUp className="h-2.5 w-2.5" /> Overtaking
+        </span>
+      </div>
       <div className="mt-1 flex justify-between px-1 text-[10px] text-zinc-400">
         {MONTHS.map((m) => (
           <span key={m}>{m}</span>
@@ -72,26 +129,34 @@ function ChartCard() {
   );
 }
 
-function StatsCard() {
+/* Stats card: both figures count up from zero, the deltas land after the
+   count, and while on screen Sales keeps ticking up like a live feed. */
+function StatsCard({ active, sales }: { active: boolean; sales: number }) {
+  const shownSales = useCountUp(sales, active, 1600);
+  const shownMarketing = useCountUp(29128, active, 1600);
   return (
     <div className="rounded-lg bg-white p-5 text-zinc-950 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]">
       <div className="grid grid-cols-2 gap-5">
         <div>
           <div className="text-[11px] text-zinc-500">Sales</div>
-          <div className="mt-1 text-xl font-semibold tracking-tight tabular-nums">$31,092</div>
-          <div className="mt-1 text-[11px]">
+          <div className="mt-1 text-xl font-semibold tracking-tight tabular-nums">
+            €{nf.format(active ? shownSales : sales)}
+          </div>
+          <div className={`mt-1 text-[11px] ${active ? "gp-fade" : "opacity-0"}`} style={{ animationDelay: "1.5s" }}>
             <span className="font-medium" style={{ color: "#006300" }}>
-              ↑ +4.2%
+              <ArrowUp className="h-3 w-3" /> +4.2%
             </span>{" "}
             <span className="text-zinc-400">from last year</span>
           </div>
         </div>
         <div className="border-l border-zinc-950/10 pl-5">
           <div className="text-[11px] text-zinc-500">Marketing</div>
-          <div className="mt-1 text-xl font-semibold tracking-tight tabular-nums">$29,128</div>
-          <div className="mt-1 text-[11px]">
+          <div className="mt-1 text-xl font-semibold tracking-tight tabular-nums">
+            €{nf.format(active ? shownMarketing : 29128)}
+          </div>
+          <div className={`mt-1 text-[11px] ${active ? "gp-fade" : "opacity-0"}`} style={{ animationDelay: "1.65s" }}>
             <span className="font-medium" style={{ color: "#d03b3b" }}>
-              ↓ −1.2%
+              <ArrowDown className="h-3 w-3" /> −1.2%
             </span>{" "}
             <span className="text-zinc-400">from last year</span>
           </div>
@@ -126,6 +191,33 @@ export default function GrowthPartner() {
   const { ref, inView } = useInView<HTMLElement>();
   const photoRef = useRef<HTMLDivElement | null>(null);
   const cardsRef = useRef<HTMLDivElement | null>(null);
+  // live feed: while the section is on screen, the figures keep creeping up
+  const [onScreen, setOnScreen] = useState(false);
+  const [sales, setSales] = useState(31092);
+  const [visitors, setVisitors] = useState(820);
+
+  useEffect(() => {
+    const section = ref.current;
+    if (!section) return;
+    const io = new IntersectionObserver(([e]) => setOnScreen(e.isIntersecting), { threshold: 0.2 });
+    io.observe(section);
+    return () => io.disconnect();
+  }, [ref]);
+
+  const live = inView && onScreen;
+  useEffect(() => {
+    if (!live) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    let t = 0;
+    const tick = () => {
+      setSales((v) => v + 12 + Math.round(Math.random() * 60));
+      setVisitors((v) => v + 1 + Math.round(Math.random() * 3));
+      t = window.setTimeout(tick, 2600 + Math.random() * 1800);
+    };
+    // first update only after the intro (draw + count-up) has finished
+    t = window.setTimeout(tick, 3400);
+    return () => window.clearTimeout(t);
+  }, [live]);
 
   // gentle depth parallax: photo leans with the pointer, cards drift against it.
   // Only runs while the section is on screen — otherwise this rAF loop would
@@ -224,21 +316,21 @@ export default function GrowthPartner() {
               <Rise inView={inView} delay={200}>
                 <div className="viz-float">
                   <TiltHover max={7}>
-                    <ChartCard />
+                    <ChartCard active={inView} live={live} visitors={visitors} />
                   </TiltHover>
                 </div>
               </Rise>
               <Rise inView={inView} delay={320}>
                 <div className="viz-float" style={{ animationDelay: "1.2s", animationDuration: "7s" }}>
                   <TiltHover max={7}>
-                    <StatsCard />
+                    <StatsCard active={inView} sales={sales} />
                   </TiltHover>
                 </div>
               </Rise>
             </div>
             <Rise inView={inView} delay={440}>
               <p className="mt-10 text-right text-[15px] text-zinc-400 lg:mt-16">
-                Clear, built to deliver.
+                Example client report — clear, built to deliver.
               </p>
             </Rise>
           </div>

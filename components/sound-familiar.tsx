@@ -109,7 +109,7 @@ function EuropeMap({ inView }: { inView: boolean }) {
         role="img"
         aria-label="Map of Europe highlighting the EU countries Nexlytic works across"
       >
-        <g fill="#f0f0ee" stroke="#ffffff" strokeWidth="0.6">
+        <g fill="#e8e8e5" stroke="#ffffff" strokeWidth="0.6">
           {NEIGHBOR_COUNTRIES.map((c) => (
             <path key={c.name} d={c.d} />
           ))}
@@ -122,7 +122,7 @@ function EuropeMap({ inView }: { inView: boolean }) {
               data-name={c.name}
               className={`cursor-pointer ${inView ? "viz-fade" : "opacity-0"}`}
               style={{
-                fill: country === c.name ? HOVER_FILL : "#dededb",
+                fill: country === c.name ? HOVER_FILL : "#cbcbc7",
                 transition: "fill 150ms ease",
                 animationDelay: `${200 + i * 25}ms`,
               }}
@@ -170,8 +170,18 @@ function EuropeMap({ inView }: { inView: boolean }) {
 
 /* The section's closing stat, pinned to the viewport: scrolling on dives
    into the black of the "+20" glyphs — the number scales up around the
-   solid "+" stroke until a black overlay finishes the fill, and the next
-   (black) section is right there when the stage unpins. */
+   solid "+" stroke until a black overlay finishes the fill.
+
+   Hand-off to "Our Services" without any empty black screen: the track has a
+   negative bottom margin of ZOOM_HANDOFF_SVH, so the next section already
+   lies over this pinned stage (content hidden, top transparent — see
+   services.tsx). The moment the fill completes (p ≈ 0.54) the Services top
+   edge sits at ~24% of the viewport and its content fades in right there.
+   Timeline: pinned scroll = 260 − 100 = 160svh; Services top at p=0.54 is
+   100 + (160 − HANDOFF) − 0.54·160 ≈ 24svh. */
+export const ZOOM_HANDOFF_SVH = 150;
+export const ZOOM_REVEAL_AT = 0.24; // Services is fully shown once its top reaches 24% of the viewport
+
 function ZoomStat() {
   const trackRef = useRef<HTMLDivElement | null>(null);
   const zoomRef = useRef<HTMLDivElement | null>(null);
@@ -184,7 +194,9 @@ function ZoomStat() {
   const projects = inView ? counted : 20;
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    /* reduced motion: no zoom, but the black fill still runs so the
+       Services hand-off lands on black instead of the light stage */
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const tick = { on: false };
 
     const update = () => {
@@ -206,12 +218,13 @@ function ZoomStat() {
          page. Geometric scaling (pow) reads as a constant-speed dive. */
       const t = Math.min(1, p / 0.6);
       const e = t * t * (3 - 2 * t); // smoothstep
-      const scale = Math.pow(9, e);
+      const scale = reduced ? 1 : Math.pow(9, e);
       zoom.style.transform = `scale(${scale.toFixed(4)}) translateZ(0)`;
       /* free the layer only while fully covered by the overlay */
       zoom.style.visibility = p > 0.75 ? "hidden" : "visible";
       caption.style.opacity = Math.min(1, Math.max(0, 1 - p * 3.5)).toFixed(3);
-      black.style.opacity = Math.min(1, Math.max(0, (p - 0.42) / 0.16)).toFixed(3);
+      /* fully black at p = 0.54 — exactly when Services reveals (see above) */
+      black.style.opacity = Math.min(1, Math.max(0, (p - 0.4) / 0.14)).toFixed(3);
     };
     const onScroll = () => {
       if (!tick.on) {
@@ -230,10 +243,14 @@ function ZoomStat() {
   }, []);
 
   return (
-    <div ref={trackRef} className="relative mt-16 h-[260svh] sm:mt-20">
+    <div
+      ref={trackRef}
+      className="relative mt-16 h-[260svh] sm:mt-20"
+      style={{ marginBottom: `-${ZOOM_HANDOFF_SVH}svh` }}
+    >
       <div
         ref={stageRef}
-        className="sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden"
+        className="sticky top-0 flex h-svh flex-col items-center justify-center overflow-hidden bg-[#fafaf9]"
       >
         <div
           ref={zoomRef}

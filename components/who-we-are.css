@@ -1,0 +1,52 @@
+/* "Who we are" (components/who-we-are.tsx) */
+/* signature writes itself left to right */
+.who-sign {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 1800ms cubic-bezier(0.55, 0, 0.25, 1) 500ms;
+}
+.who-sign.is-on {
+  clip-path: inset(0 0 0 0);
+}
+.who-online {
+  animation: who-online 2s ease-in-out infinite;
+}
+@keyframes who-online {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .who-sign {
+    clip-path: none;
+    transition: none;
+  }
+  .who-online {
+    animation: none;
+  }
+}
+
+/* physics tag pile (components/who-physics.tsx) */
+.who-tag {
+  visibility: hidden; /* shown when its body drops in */
+  touch-action: none; /* dragging a tag must not scroll the page */
+  will-change: transform;
+}
+.who-tag.is-grabbed {
+  cursor: grabbing;
+  z-index: 10;
+  filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.25));
+}
+/* reduced motion: a calm wrapped list instead of physics */
+.who-pile[data-static="true"] {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-end;
+  gap: 10px;
+  height: auto !important;
+}
+.who-pile[data-static="true"] .who-tag {
+  position: static;
+  visibility: visible;
+  transform: none !important;
+  cursor: default;
+}

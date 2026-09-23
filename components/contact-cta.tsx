@@ -84,7 +84,7 @@ export default function ContactCta() {
           }`}
           style={{ transitionDelay: "150ms" }}
         >
-          <TiltCard>
+          <TiltCard glyphs={false}>
             <h3 className="text-2xl font-medium tracking-[-0.01em] sm:text-3xl">
               Start your project
             </h3>

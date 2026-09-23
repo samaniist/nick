@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import HeroSpotlight from "@/components/hero-spotlight";
 import KeyboardBall from "@/components/keyboard-ball";
 import Magnetic from "@/components/magnetic";
 
@@ -21,10 +20,6 @@ export default function Hero() {
   return (
     // sticky: the next section slides up over the hero on scroll
     <section className="sticky top-0 z-20 flex min-h-svh flex-col overflow-hidden bg-black font-sans text-white">
-      {/* faint wash of the keyword neon over the whole section */}
-      <div aria-hidden className="hero-glow pointer-events-none absolute inset-0" />
-      {/* soft spotlight trailing the pointer */}
-      <HeroSpotlight />
 
       <header className="relative z-10 flex flex-col items-stretch gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-6 lg:px-14">
         <Link href="/" aria-label="Nexlytic home" className="w-fit rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
@@ -39,8 +34,14 @@ export default function Hero() {
         </Link>
         <nav
           aria-label="Primary navigation"
-          className="grid w-full grid-cols-[1fr_1.25fr_1fr] items-center gap-2 sm:flex sm:w-auto sm:gap-7"
+          className="grid w-full grid-cols-[1fr_1fr_1.4fr_1fr] items-center gap-1.5 sm:flex sm:w-auto sm:gap-7"
         >
+          <Link
+            href="/services"
+            className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-[3px] border border-white/15 px-2 text-xs text-white transition-colors hover:border-white/35 hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:min-h-0 sm:rounded-none sm:border-0 sm:px-0 sm:text-[15px] sm:hover:bg-transparent sm:hover:text-zinc-300"
+          >
+            Services
+          </Link>
           <Link
             href="/case-studies"
             className="inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-[3px] border border-white/15 px-2 text-xs text-white transition-colors hover:border-white/35 hover:bg-white/[0.05] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white sm:min-h-0 sm:rounded-none sm:border-0 sm:px-0 sm:text-[15px] sm:hover:bg-transparent sm:hover:text-zinc-300"
@@ -86,15 +87,9 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* keycap ball: in the flow below the copy on mobile/tablet, pinned to
+      {/* glass keycap globe on a pure black field: in the flow below the copy on mobile/tablet, pinned to
           the right third on desktop; keys type themselves and react to the pointer */}
-      <div className="relative flex h-[300px] items-center justify-center sm:h-[460px] lg:absolute lg:inset-y-0 lg:right-[9%] lg:h-auto lg:w-1/3">
-        {/* white neon lamp behind the ball (desktop only); on mobile the
-            headline's own neon wash is enough light */}
-        <div
-          aria-hidden
-          className="ball-backlight absolute left-1/2 top-1/2 hidden h-[760px] w-[760px] rounded-full lg:block"
-        />
+      <div className="relative flex h-[350px] items-center justify-center sm:h-[490px] lg:absolute lg:inset-y-0 lg:right-[9%] lg:h-auto lg:w-1/3">
         <KeyboardBall />
       </div>
 

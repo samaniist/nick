@@ -21,6 +21,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.9,
     },
     {
+      url: "https://nexlytic.de/services",
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
       url: "https://nexlytic.de/services/performance-marketing",
       lastModified: new Date(),
       changeFrequency: "monthly",
