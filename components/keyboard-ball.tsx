@@ -210,11 +210,8 @@ export default function KeyboardBall() {
     } catch {
       return; // no WebGL: the hero simply shows its backlight
     }
-    // Glass (transmission) renders the scene twice per frame — keep the pixel
-    // count sane on phones and compute the refraction at reduced resolution.
     const phone = window.matchMedia("(max-width: 767px)").matches;
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, phone ? 1.5 : 1.75));
-    renderer.transmissionResolutionScale = phone ? 0.4 : 0.6;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.15;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -283,19 +280,10 @@ export default function KeyboardBall() {
     const legendTextures = LEGENDS.map((l) => legendTexture(l, font));
     const haloTextures = LEGENDS.map((l) => legendTexture(l, font, 12));
 
-    // smoked, lightly frosted glass
-    const baseCap = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff,
-      metalness: 0,
-      roughness: 0.14,
-      transmission: 1,
-      thickness: 0.3,
-      ior: 1.5,
-      attenuationColor: new THREE.Color(0x8a8f99),
-      attenuationDistance: 0.3,
-      specularIntensity: 1,
-      clearcoat: 1,
-      clearcoatRoughness: 0.08,
+    const baseCap = new THREE.MeshStandardMaterial({
+      color: 0x1a1b1e,
+      metalness: 0.2,
+      roughness: 0.3,
       envMapIntensity: 1,
       emissive: 0xffffff,
       emissiveIntensity: 0,
@@ -303,7 +291,7 @@ export default function KeyboardBall() {
 
     type Key = {
       cap: THREE.Mesh;
-      capMat: THREE.MeshPhysicalMaterial;
+      capMat: THREE.MeshStandardMaterial;
       legendMat: THREE.MeshBasicMaterial;
       haloMat: THREE.MeshBasicMaterial;
       spillMat: THREE.MeshBasicMaterial;
@@ -531,7 +519,7 @@ export default function KeyboardBall() {
         k.press += (k.target - k.press) * Math.min(1, dt * rate);
         const p = k.press;
         k.cap.position.z = CAP_H / 2 - 0.035 - p * 0.055;
-        k.capMat.emissiveIntensity = p * 0.05; // glass lit from within
+        k.capMat.emissiveIntensity = p * 0.05;
         k.haloMat.opacity = HALO_IDLE + p * (1 - HALO_IDLE);
         k.spillMat.opacity = p * 0.2;
         k.spill.visible = p > 0.01; // only drawn while a key is lit
