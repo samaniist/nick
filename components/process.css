@@ -10,6 +10,15 @@
     stroke-dashoffset: 0;
   }
 }
+.proc-bar-progress {
+  transform: scaleX(0);
+  animation: proc-bar-progress linear forwards;
+}
+@keyframes proc-bar-progress {
+  to {
+    transform: scaleX(1);
+  }
+}
 .proc-wheel-num {
   animation: proc-wheel-num 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -32,7 +41,8 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .proc-wheel-progress {
+  .proc-wheel-progress,
+  .proc-bar-progress {
     display: none;
   }
   .proc-wheel-num,

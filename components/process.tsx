@@ -109,6 +109,8 @@ export default function Process() {
   // cumulative wheel angle so it always turns the short way round
   const [spin, setSpin] = useState(0);
   const tabsRef = useRef<(SVGGElement | null)[]>([]);
+  const mobileTabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const swipeX = useRef<number | null>(null);
   const tiltRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -135,15 +137,15 @@ export default function Process() {
   }, [auto, visible, active, goTo]);
 
   const select = useCallback(
-    (i: number, focus = false) => {
+    (i: number) => {
       setAuto(false);
       goTo(i);
-      if (focus) tabsRef.current[i]?.focus();
     },
     [goTo],
   );
 
-  const onKeyDown = (e: React.KeyboardEvent, i: number) => {
+  // shared by the wheel (desktop) and the compact tab bar (mobile)
+  const onKeyDown = (e: React.KeyboardEvent, i: number, tabs: React.RefObject<(HTMLElement | SVGGElement | null)[]>) => {
     const n = STEPS.length;
     const map: Record<string, number> = {
       ArrowRight: (i + 1) % n,
@@ -155,7 +157,8 @@ export default function Process() {
     };
     if (e.key in map) {
       e.preventDefault();
-      select(map[e.key], true);
+      select(map[e.key]);
+      tabs.current[map[e.key]]?.focus();
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       select(i);
@@ -171,6 +174,19 @@ export default function Process() {
     const y = (e.clientY - r.top) / r.height - 0.5;
     el.style.transform = `perspective(900px) rotateX(${(-y * 14).toFixed(2)}deg) rotateY(${(x * 14).toFixed(2)}deg)`;
   };
+  // mobile: swipe the panel to change step
+  const onSwipeStart = (e: React.TouchEvent) => {
+    swipeX.current = e.touches[0].clientX;
+  };
+  const onSwipeEnd = (e: React.TouchEvent) => {
+    if (swipeX.current === null) return;
+    const dx = e.changedTouches[0].clientX - swipeX.current;
+    swipeX.current = null;
+    if (Math.abs(dx) < 50) return;
+    const n = STEPS.length;
+    select(dx < 0 ? (active + 1) % n : (active - 1 + n) % n);
+  };
+
   const onWheelLeave = () => {
     if (tiltRef.current) tiltRef.current.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
     setHover(-1);
@@ -199,10 +215,10 @@ export default function Process() {
           </h2>
         </Rise>
 
-        <div className="mx-auto mt-14 grid max-w-6xl items-center gap-10 sm:mt-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
-          {/* ---- left: the wheel ---- */}
+        <div className="mx-auto mt-10 grid max-w-6xl items-center gap-10 sm:mt-14 lg:mt-20 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
+          {/* ---- left: the wheel (desktop; mobile uses the tab bar in the panel) ---- */}
           <Rise inView={inView} delay={160}>
-            <div className="mx-auto w-full max-w-[350px] sm:max-w-[460px]" onPointerMove={onWheelMove} onPointerLeave={onWheelLeave}>
+            <div className="mx-auto hidden w-full max-w-[460px] lg:block" onPointerMove={onWheelMove} onPointerLeave={onWheelLeave}>
               <div
                 ref={tiltRef}
                 className="will-change-transform"
@@ -281,7 +297,7 @@ export default function Process() {
                           aria-label={`Step ${s.no}: ${s.fullTitle ?? s.title}`}
                           tabIndex={on ? 0 : -1}
                           onClick={() => select(i)}
-                          onKeyDown={(e) => onKeyDown(e, i)}
+                          onKeyDown={(e) => onKeyDown(e, i, tabsRef)}
                           onPointerEnter={() => setHover(i)}
                           onPointerLeave={() => setHover(-1)}
                           className="group cursor-pointer outline-none"
@@ -416,11 +432,55 @@ export default function Process() {
               id="proc-panel"
               role="tabpanel"
               aria-labelledby={`proc-tab-${active}`}
+              onTouchStart={onSwipeStart}
+              onTouchEnd={onSwipeEnd}
               className="rounded-[28px] border border-white/10 bg-[#0b0b0c]/90 bg-linear-to-b from-white/[0.09] via-white/[0.04] to-white/[0.02] p-5 shadow-[0_40px_90px_-30px_rgba(0,0,0,0.85)] sm:p-8 lg:p-9"
             >
+              {/* compact step tabs: keep steps and scene in one view on mobile */}
+              <div role="tablist" aria-label="Process steps" className="mb-5 grid grid-cols-4 gap-1.5 lg:hidden">
+                {STEPS.map((s, i) => {
+                  const on = i === active;
+                  return (
+                    <button
+                      key={s.no}
+                      ref={(el) => {
+                        mobileTabsRef.current[i] = el;
+                      }}
+                      type="button"
+                      role="tab"
+                      aria-selected={on}
+                      aria-controls="proc-panel"
+                      tabIndex={on ? 0 : -1}
+                      onClick={() => select(i)}
+                      onKeyDown={(e) => onKeyDown(e, i, mobileTabsRef)}
+                      className={`relative flex flex-col items-center gap-1 overflow-hidden rounded-xl border px-1 pt-2.5 pb-2 transition-colors duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                        on ? "border-white bg-white text-black" : "border-white/10 bg-white/[0.04] text-white"
+                      }`}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`h-4 w-4 ${on ? "opacity-85" : "opacity-55"}`} aria-hidden="true">
+                        {s.icon.map((d) => (
+                          <path key={d} d={d} />
+                        ))}
+                      </svg>
+                      <span className={`text-[9px] font-medium tracking-[0.18em] ${on ? "text-black/55" : "text-zinc-500"}`}>{s.no}</span>
+                      <span className="text-[13px] font-medium leading-none">{s.title}</span>
+                      {/* autoplay progress */}
+                      {on && auto && visible && (
+                        <span
+                          key={`mp-${active}`}
+                          className="proc-bar-progress absolute inset-x-0 bottom-0 h-0.5 origin-left bg-black/40"
+                          style={{ animationDuration: `${AUTOPLAY_MS}ms` }}
+                          aria-hidden="true"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* key → remount: the scene replays and the copy slides in */}
               <div key={active} className="proc-panel-in">
-                <div className="flex items-center justify-between text-xs font-medium uppercase tracking-[0.2em] text-zinc-500 sm:text-sm">
+                <div className="hidden items-center justify-between text-xs font-medium uppercase tracking-[0.2em] text-zinc-500 sm:text-sm lg:flex">
                   <span>Step {step.no}</span>
                   {/* step dots */}
                   <span className="flex items-center gap-1.5" aria-hidden="true">
@@ -429,12 +489,12 @@ export default function Process() {
                     ))}
                   </span>
                 </div>
-                <div className="mt-5 h-[220px] sm:h-[260px] lg:h-[290px]">
+                <div className="h-[220px] lg:mt-5 sm:h-[260px] lg:h-[290px]">
                   <Viz />
                 </div>
-                <h3 className="mt-7 text-3xl font-medium tracking-[-0.01em] lg:text-4xl">{step.fullTitle ?? step.title}</h3>
+                <h3 className="mt-5 text-2xl sm:text-3xl lg:mt-7 font-medium tracking-[-0.01em] lg:text-4xl">{step.fullTitle ?? step.title}</h3>
                 <span className="mt-4 block h-px w-12 bg-white/40" aria-hidden="true" />
-                <p className="mt-4 min-h-[3.5em] text-base leading-relaxed text-zinc-300 lg:text-lg">{step.text}</p>
+                <p className="mt-4 min-h-[3.5em] text-[15px] sm:text-base leading-relaxed text-zinc-300 lg:text-lg">{step.text}</p>
                 {active === STEPS.length - 1 ? (
                   <Magnetic className="mt-6">
                     <Link
