@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
+import MagIcon from "./mag-icon";
 import Link from "next/link";
 import s from "./mag-chapters.module.css";
 
@@ -65,19 +66,19 @@ export default function MagChapters() {
     <section className={s.expertise} data-scene aria-labelledby="expertise-title">
       <div className={s.sticky}>
         <div className={s.chapterLabel}><span>03 / LE SAVOIR-FAIRE</span><span>UNE VISION. TOUS LES MÉTIERS.</span></div>
-        <h2 id="expertise-title" className={s.expertiseTitle}>Changer de <em>perspective.</em><span aria-hidden="true">↘</span></h2>
+        <h2 id="expertise-title" className={s.expertiseTitle}>Changer de <em>perspective.</em><span aria-hidden="true"><MagIcon name="down-right" /></span></h2>
         <div className={s.serviceRail} data-rail>
           {services.map((service, i) => <article key={service.title} className={s.serviceCard} style={{ "--i": i } as CSSProperties}>
             <div className={s.cardInner}>
               <div className={s.cardTop}><span>{service.category}</span><span>0{i + 1}</span></div>
               <div className={`${s.sculpture} ${s[service.shape]}`} aria-hidden="true">{Array.from({length:7},(_,j)=><i key={j} style={{"--j":j} as CSSProperties}/>)}</div>
               <h3>{service.title}</h3><p>{service.detail}</p>
-              <div className={s.cardBottom}><span>{service.tags}</span><a href="#contact-mag" aria-label={`Parlons de votre projet : ${service.category}`} onClick={()=>setProject(i===0?"Rénovation complète":i===1?"Cuisine / Salle de bain":"Extérieur")}>↗</a></div>
+              <div className={s.cardBottom}><span>{service.tags}</span><a href="#contact-mag" aria-label={`Parlons de votre projet : ${service.category}`} onClick={()=>setProject(i===0?"Rénovation complète":i===1?"Cuisine / Salle de bain":"Extérieur")}><MagIcon name="up-right" /></a></div>
             </div>
           </article>)}
-          <div className={s.railEnd}><span>VOTRE ESPACE.</span><strong>Sans<br /><em>limites.</em></strong><a href="#contact-mag">À vous de jouer ↗</a></div>
+          <div className={s.railEnd}><span>VOTRE ESPACE.</span><strong>Sans<br /><em>limites.</em></strong><a href="#contact-mag">À vous de jouer <MagIcon name="up-right" /></a></div>
         </div>
-        <div className={s.railFooter}><span>LE MOUVEMENT CONTINUE</span><div><i/></div><span>SCROLLEZ POUR EXPLORER →</span></div>
+        <div className={s.railFooter}><span>LE MOUVEMENT CONTINUE</span><div><i/></div><span>SCROLLEZ POUR EXPLORER <MagIcon name="right" /></span></div>
       </div>
     </section>
 
@@ -93,7 +94,7 @@ export default function MagChapters() {
             <div className={`${s.layer} ${s.finish}`}><span>03 / LES MATIÈRES</span><Image src="/mag/after.jpg" alt="" fill sizes="45vw" /></div>
             <div className={`${s.layer} ${s.roof}`}><span>04 / VOTRE NOUVELLE VIE</span><b>mag®</b></div>
           </div>
-          <span className={s.dimension}>UNE NOUVELLE DIMENSION ↗</span>
+          <span className={s.dimension}>UNE NOUVELLE DIMENSION <MagIcon name="up-right" /></span>
         </div>
         <div className={s.stepList}>{steps.map((step,i)=><button key={step.tag} onClick={()=>goToStep(i)} className={s.step} data-index={i}><span>{step.tag}</span><h3>{step.title}</h3><p>{step.text}</p></button>)}</div>
         <div className={s.processBottom}><span>DU PREMIER ÉCHANGE AU DERNIER DÉTAIL.</span><div><i/></div><span>MAG RÉNOVATION</span></div>
@@ -106,13 +107,13 @@ export default function MagChapters() {
         <div className={s.chapterLabel}><span>05 / À VOUS D’IMAGINER</span><span>BORDEAUX & NOUVELLE-AQUITAINE</span></div>
         <div className={s.finalContent}>
           <p className={s.invitation}>LE PLUS BEAU PROJET, C’EST LE VÔTRE.</p>
-          <h2 id="final-title">Et si on<br /><em>osait ?</em><span aria-hidden="true">↗</span></h2>
-          <fieldset className={s.projectChoices}><legend>QU’AVEZ-VOUS ENVIE DE TRANSFORMER ?</legend>{["Rénovation complète","Cuisine / Salle de bain","Extérieur"].map(item=><button type="button" key={item} aria-pressed={project===item} onClick={()=>setProject(item)}>{item}<span>{project===item?"↗":"+"}</span></button>)}</fieldset>
-          <div className={s.finalActions}><a href="tel:+33695331511" className={s.call}>Donnons vie à votre projet <span>↗</span></a><span>Un premier échange. Un devis gratuit.<br/><b>06 95 33 15 11</b></span></div>
+          <h2 id="final-title">Et si on<br /><em>osait ?</em><span aria-hidden="true"><MagIcon name="up-right" /></span></h2>
+          <fieldset className={s.projectChoices}><legend>QU’AVEZ-VOUS ENVIE DE TRANSFORMER ?</legend>{["Rénovation complète","Cuisine / Salle de bain","Extérieur"].map(item=><button type="button" key={item} aria-pressed={project===item} onClick={()=>setProject(item)}>{item}<span><MagIcon name={project===item?"up-right":"plus"} /></span></button>)}</fieldset>
+          <div className={s.finalActions}><a href="tel:+33695331511" className={s.call}>Donnons vie à votre projet <span><MagIcon name="up-right" /></span></a><span>Un premier échange. Un devis gratuit.<br/><b>06 95 33 15 11</b></span></div>
           <p className={s.selection} aria-live="polite">Votre envie : {project.toLowerCase()}.</p>
         </div>
-        <label className={s.lightControl}>DESSINEZ VOTRE LUMIÈRE <input type="range" min="0" max="100" value={warmth} onChange={e=>setWarmth(Number(e.target.value))} aria-label="Chaleur de la lumière"/><span>CLAIR ↔ CHALEUREUX</span></label>
-        <footer className={s.footer}><a href="/mag" aria-label="Retour en haut">mag<span>®</span></a><span>RÉNOVATION INTÉRIEURE & EXTÉRIEURE</span><a href="https://www.instagram.com/mag.renovation33/" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><small>CONCEPT & DESIGN — <Link href="/">NEXLYTIC</Link></small></footer>
+        <label className={s.lightControl}>DESSINEZ VOTRE LUMIÈRE <input type="range" min="0" max="100" value={warmth} onChange={e=>setWarmth(Number(e.target.value))} aria-label="Chaleur de la lumière"/><span>CLAIR <MagIcon name="compare" /> CHALEUREUX</span></label>
+        <footer className={s.footer}><a href="/mag" aria-label="Retour en haut">mag<span>®</span></a><span>RÉNOVATION INTÉRIEURE & EXTÉRIEURE</span><a href="https://www.instagram.com/mag.renovation33/" target="_blank" rel="noreferrer">INSTAGRAM <MagIcon name="up-right" /></a><small>CONCEPT & DESIGN — <Link href="/">NEXLYTIC</Link></small></footer>
       </div>
     </section>
   </div>;

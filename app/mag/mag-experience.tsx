@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
+import MagIcon from "./mag-icon";
 import styles from "./mag.module.css";
 import MagChapters from "./mag-chapters";
 
@@ -135,7 +136,7 @@ export default function MagExperience() {
           <header className={styles.header}>
             <a href="/mag" className={styles.logo} aria-label="MAG Rénovation, accueil">mag<span>®</span><small>RÉNOVATION</small></a>
             <span className={styles.location}><i /> BORDEAUX · NOUVELLE-AQUITAINE</span>
-            <a href="#contact-mag" className={styles.contactLink}>Parlons de votre projet <span>↗</span></a>
+            <a href="#contact-mag" className={styles.contactLink}>Parlons de votre projet <span><MagIcon name="up-right" /></span></a>
           </header>
 
           <div ref={film} className={styles.film}>
@@ -147,18 +148,18 @@ export default function MagExperience() {
             <span className={styles.filmCorner}>UNE AUTRE DIMENSION.</span>
             <div className={styles.scanline} aria-hidden="true" />
           </div>
-          <div className={styles.orbitLabel} aria-hidden="true">LA VISION DEVIENT RÉELLE <span>↙</span></div>
+          <div className={styles.orbitLabel} aria-hidden="true">LA VISION DEVIENT RÉELLE <span><MagIcon name="down-left" /></span></div>
 
           <section ref={intro} className={styles.intro} aria-labelledby="mag-heading">
             <div className={styles.eyebrow}><span>01 / L’IMPULSION</span><span>RÉNOVATION INTÉRIEURE & EXTÉRIEURE</span></div>
             <h1 id="mag-heading" className={styles.title}>
               <span className={styles.titleLine}><span style={{ "--delay": "90ms", "--tilt": "-5deg" } as CSSProperties}>L’ART DE</span></span>
-              <span className={styles.titleLine}><span style={{ "--delay": "240ms", "--tilt": "4deg" } as CSSProperties}>TOUT</span><em style={{ "--delay": "360ms", "--tilt": "-8deg" } as CSSProperties}>↗</em></span>
+              <span className={styles.titleLine}><span style={{ "--delay": "240ms", "--tilt": "4deg" } as CSSProperties}>TOUT</span><em style={{ "--delay": "360ms", "--tilt": "-8deg" } as CSSProperties}><MagIcon name="up-right" /></em></span>
               <span className={`${styles.titleLine} ${styles.outline}`}><span style={{ "--delay": "440ms", "--tilt": "-3deg" } as CSSProperties}>RÉINVENTER.</span></span>
             </h1>
             <div className={styles.heroBottom}>
               <p>Vos espaces ont un potentiel.<br /><span>Nous lui donnons vie.</span></p>
-              <button onClick={discover} className={styles.discover}>Explorer la transformation <span>↓</span></button>
+              <button onClick={discover} className={styles.discover}>Explorer la transformation <span><MagIcon name="down" /></span></button>
             </div>
             <div className={styles.reflection} aria-hidden="true">RÉINVENTER.</div>
           </section>
@@ -172,7 +173,7 @@ export default function MagExperience() {
                 {materials.map((item, index) => <button key={item.name} aria-pressed={material === index} onClick={() => setMaterial(index)} className={material === index ? styles.selectedMaterial : ""}><i style={{ background: item.color }} /><span>{item.name}</span></button>)}
               </div>
               <p className={styles.materialDetail} aria-live="polite">{materials[material].detail}</p>
-              <a className={styles.visionCta} href="#contact-mag">Et si c’était chez vous ? <span>↗</span></a>
+              <a className={styles.visionCta} href="#contact-mag">Et si c’était chez vous ? <span><MagIcon name="up-right" /></span></a>
             </div>
             <div className={styles.project}>
               <div className={styles.projectTop}><span>ÉTUDE D’ATMOSPHÈRE / 001</span><span>MAG — BORDEAUX</span></div>
@@ -181,15 +182,15 @@ export default function MagExperience() {
                 <div className={styles.after}><Image src="/mag/after.jpg" alt="Le dernier plan du film : cuisine rénovée, pierre et bois" fill sizes="(max-width: 759px) 90vw, 44vw" /></div>
                 <div className={styles.materialLens} aria-hidden="true" />
                 <span className={styles.imageTag}>{comparison < 50 ? "AVANT" : "APRÈS"}</span>
-                <span className={styles.divider} aria-hidden="true"><b>↔</b></span>
+                <span className={styles.divider} aria-hidden="true"><b><MagIcon name="compare" /></b></span>
                 <input className={styles.range} type="range" min="0" max="100" value={comparison} aria-label="Comparer avant et après rénovation" aria-valuetext={`${comparison} % de l’image après rénovation`} onChange={(e) => setComparison(Number(e.target.value))} />
               </div>
-              <div className={styles.projectBottom}><span>Glissez pour révéler l’avant <span>↔</span></span><small>VISUALISATION CONCEPTUELLE</small></div>
+              <div className={styles.projectBottom}><span>Glissez pour révéler l’avant <span><MagIcon name="compare" /></span></span><small>VISUALISATION CONCEPTUELLE</small></div>
             </div>
           </section>
 
           <div className={styles.stageFooter}>
-            <button className={styles.playToggle} aria-label={paused ? "Lancer le film" : "Mettre le film en pause"} aria-pressed={paused} onClick={() => setPaused(!paused)}>{paused ? "▷" : "Ⅱ"}<span>{paused ? "Lancer le film" : "Pause du film"}</span></button>
+            <button className={styles.playToggle} aria-label={paused ? "Lancer le film" : "Mettre le film en pause"} aria-pressed={paused} onClick={() => setPaused(!paused)}><MagIcon name={paused ? "play" : "pause"} /><span>{paused ? "Lancer le film" : "Pause du film"}</span></button>
             <div className={styles.scrollTrack}><span>SCROLL TO TRANSFORM</span><div><i /></div><span ref={progressLabel}>00</span><small>/ 100</small></div>
             <span className={styles.signature}>IMAGINÉ POUR VOUS. <i>PAR MAG.</i></span>
           </div>
