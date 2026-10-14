@@ -33,16 +33,6 @@ export const webProjects: WebProject[] = [
     size: "wide",
   },
   {
-    name: "Onelogy",
-    domain: "onelogy.com",
-    href: "https://onelogy.com/",
-    description:
-      "A bold, product-first storefront that gives an unconventional skincare format a clear and memorable digital identity.",
-    services: ["Web Design", "Brand Presentation", "Digital Product"],
-    preview: "onelogy",
-    size: "compact",
-  },
-  {
     name: "Mondzorgpraktijk Veenendaal",
     domain: "mondzorgpraktijkveenendaal.nl",
     href: "https://mondzorgpraktijkveenendaal.nl/",

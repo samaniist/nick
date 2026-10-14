@@ -65,7 +65,7 @@ export default function HeroWorkStack() {
     <div
       ref={sceneRef}
       className="work-stack relative mx-auto aspect-[0.92] w-full max-w-[590px] [perspective:1300px]"
-      aria-label="A layered composition highlighting Nexlytic work across commerce, wellness, and healthcare"
+      aria-label="A layered composition highlighting Nexlytic work across wellness and healthcare"
       role="img"
     >
       <div className="work-stack-grid absolute inset-[8%] rounded-[32px] border border-white/8" aria-hidden="true" />
@@ -91,12 +91,12 @@ export default function HeroWorkStack() {
 
       <div className="work-layer work-layer-mid absolute bottom-[13%] right-[3%] w-[67%] overflow-hidden rounded-2xl border border-white/12 bg-[#11120f] shadow-2xl">
         <div className="flex h-9 items-center justify-between border-b border-white/10 px-3">
-          <span className="font-mono text-[8px] tracking-[0.16em] text-white/40">onelogy.com</span>
+          <span className="font-mono text-[8px] tracking-[0.16em] text-white/40">mondzorghaveneiland.nl</span>
           <span className="h-1.5 w-1.5 rounded-full bg-[#b9ff2b]" />
         </div>
         <div className="relative aspect-[1.48]">
           <Image
-            src="/case-studies/onelogy-home.png"
+            src="/case-studies/haveneiland-home.png"
             alt=""
             fill
             loading="eager"
