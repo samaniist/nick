@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "@/components/icons";
 
 /* The contact form itself — shared between the /contact page (inside the
@@ -18,7 +18,7 @@ function FieldError({ id, msg }: { id: string; msg: string }) {
 }
 
 const inputCls =
-  "w-full min-h-[44px] rounded-lg border border-white/20 bg-white/[0.06] px-4 py-3 text-[15px] text-white placeholder:text-zinc-500 outline-none transition-all duration-200 focus:border-white/40 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(255,255,255,0.08)]";
+  "w-full min-h-[44px] rounded-lg border border-white/20 bg-white/[0.06] px-4 py-3 text-base sm:text-[15px] text-white placeholder:text-zinc-500 outline-none transition-all duration-200 focus:border-white/40 focus:bg-white/[0.07] focus:shadow-[0_0_24px_rgba(255,255,255,0.08)]";
 
 /* Submit button. Deliberately NO transform animations: inside the tilt
    card's preserve-3d context, a hover/press scale transition makes
@@ -47,6 +47,12 @@ type Errors = Partial<Record<"name" | "email" | "message", string>>;
 type Status = "idle" | "sending" | "sent" | "fallback";
 
 export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
+  const topicSelect = useRef<HTMLSelectElement>(null);
+  useEffect(() => {
+    const topics: Record<string, string> = { brand: "Branding", sales: "E-Commerce", systems: "Automation & Workflows", leads: "Lead Generation & Appointments" };
+    const goal = new URLSearchParams(window.location.search).get("goal");
+    if (goal && topics[goal] && topicSelect.current) topicSelect.current.value = topics[goal];
+  }, []);
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<Status>("idle");
 
@@ -189,7 +195,7 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
           <label htmlFor={`${p}-topic`} className="mb-2 block text-sm text-zinc-300">
             What do you need?
           </label>
-          <select id={`${p}-topic`} name="topic" defaultValue="" className={`${inputCls} appearance-none`}>
+          <select ref={topicSelect} id={`${p}-topic`} name="topic" defaultValue="" className={`${inputCls} appearance-none`}>
             <option value="" className="bg-zinc-900">
               Choose a service (optional)
             </option>
@@ -199,6 +205,8 @@ export default function ContactForm({ idPrefix = "c" }: { idPrefix?: string }) {
               "Performance Marketing",
               "E-Commerce",
               "Branding",
+              "Automation & Workflows",
+              "Lead Generation & Appointments",
               "Something else",
             ].map((o) => (
               <option key={o} value={o} className="bg-zinc-900">

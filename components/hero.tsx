@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { KeyboardBall } from "@/components/lazy-3d";
+import HeroFilm from "@/components/hero-film";
 import Magnetic from "@/components/magnetic";
 
 /* Client logos, all rendered as flat light-gray marks on transparent
@@ -15,10 +15,10 @@ const clients = [
   { name: "Atlantis Integrative Medicine & Psychiatry", src: "/clients/atlantis.png", width: 2992, height: 620, size: "h-9" },
 ];
 
-export default function Hero() {
+export default function Hero({ showClients = true }: { showClients?: boolean }) {
   return (
-    // sticky: the next section slides up over the hero on scroll
-    <section className="sticky top-0 z-20 flex min-h-svh flex-col overflow-hidden bg-black font-sans text-white">
+    <>
+    <HeroFilm>
 
       <header className="relative z-10 flex flex-col items-stretch gap-4 px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-10 sm:py-6 lg:px-14">
         <Link href="/" aria-label="Nexlytic home" className="w-fit rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
@@ -62,37 +62,19 @@ export default function Hero() {
         </nav>
       </header>
 
-      <div className="relative z-10 flex flex-1 flex-col justify-center px-6 sm:px-10 lg:pl-28 lg:pr-14">
-        <h1 className="hero-title max-w-4xl text-[48px] font-medium leading-[1.08] tracking-[-0.02em] sm:text-[64px] lg:text-[80px]">
-          <span className="text-zinc-400">Built for</span>{" "}
-          <span className="hero-neon">Growth.</span>
-          <br />
-          <span className="text-zinc-400">Driven by</span>{" "}
-          <span className="hero-neon">Data.</span>
-        </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-zinc-300 sm:text-xl">
-          Your digital growth agency — web design, SEO and performance
-          marketing built for measurable, long-term success.
-        </p>
-        <div className="mt-8">
+      <div className="hero-film-copy relative z-10 flex flex-1 flex-col justify-center px-6 sm:px-10 lg:pl-20">
+        <p className="hero-film-eyebrow">Munich · Digital growth studio</p>
+        <h1 className="hero-film-title">Built for<br />what’s<br /><span>next.</span></h1>
+        <p className="hero-film-tags">Brand. Web. Performance.</p>
+        <div className="hero-film-cta mt-7">
           <Magnetic>
-            <Link
-              href="/contact"
-              className="inline-block rounded-[3px] bg-white px-6 py-3 text-[15px] font-medium text-black transition-colors hover:bg-zinc-200"
-            >
-              Book Free Call
-            </Link>
+            <Link href="/contact" className="inline-flex items-center gap-8 rounded-[3px] bg-white px-6 py-3.5 text-[14px] font-medium text-black transition-colors hover:bg-zinc-200">Build your next chapter <span aria-hidden="true">↗</span></Link>
           </Magnetic>
         </div>
       </div>
 
-      {/* glass keycap globe on a pure black field: in the flow below the copy on mobile/tablet, pinned to
-          the right third on desktop; keys type themselves and react to the pointer */}
-      <div className="relative flex h-[350px] items-center justify-center sm:h-[490px] lg:absolute lg:inset-y-0 lg:right-[9%] lg:h-auto lg:w-1/3">
-        <KeyboardBall />
-      </div>
-
-      <div className="relative z-10 flex flex-col gap-y-4 px-6 pb-12 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-12 sm:gap-y-5 sm:px-10 lg:px-14">
+    </HeroFilm>
+      {showClients && <div id="hero-clients" className="hero-film-clients relative z-10 flex flex-col gap-y-4 px-6 pb-12 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-12 sm:gap-y-5 sm:px-10 lg:px-14">
         <span className="text-[17px] font-semibold">Trusted By:</span>
 
         {/* mobile: one endless sliding row (same seamless two-copy marquee as
@@ -137,7 +119,7 @@ export default function Hero() {
             </li>
           ))}
         </ul>
-      </div>
-    </section>
+      </div>}
+    </>
   );
 }

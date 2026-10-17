@@ -47,6 +47,8 @@ export default function WhoTunnel() {
     if (!track || !stage) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
+    let disposed = false;
+    let scrollFrame = 0;
     const rnd = mulberry32(11);
     const words = Array.from(stage.querySelectorAll<HTMLElement>("[data-sw]"));
     const ambient = Array.from(stage.querySelectorAll<HTMLElement>("[data-aw]"));
@@ -67,14 +69,15 @@ export default function WhoTunnel() {
     let W = 0;
     let H = 0;
     const measure = () => {
+      if (disposed || !stage.isConnected) return;
       const sr = stage.getBoundingClientRect();
       W = sr.width;
       H = sr.height;
       // layout position of each word's centre, relative to the stage centre
       // (transforms don't affect layout, so this is the landed position)
       centers = words.map((w) => ({
-        x: w.offsetLeft + w.offsetWidth / 2 - W / 2 + (w.offsetParent as HTMLElement).offsetLeft,
-        y: w.offsetTop + w.offsetHeight / 2 - H / 2 + (w.offsetParent as HTMLElement).offsetTop,
+        x: w.offsetLeft + w.offsetWidth / 2 - W / 2 + ((w.offsetParent as HTMLElement | null)?.offsetLeft ?? 0),
+        y: w.offsetTop + w.offsetHeight / 2 - H / 2 + ((w.offsetParent as HTMLElement | null)?.offsetTop ?? 0),
       }));
     };
 
@@ -120,6 +123,7 @@ export default function WhoTunnel() {
     let queued = false;
     const update = () => {
       queued = false;
+      if (disposed) return;
       const r = track.getBoundingClientRect();
       const total = r.height - window.innerHeight;
       p = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0;
@@ -128,7 +132,7 @@ export default function WhoTunnel() {
     const onScroll = () => {
       if (!queued) {
         queued = true;
-        requestAnimationFrame(update);
+        scrollFrame = requestAnimationFrame(update);
       }
     };
 
@@ -142,6 +146,7 @@ export default function WhoTunnel() {
       tgt.y = (e.clientY / window.innerHeight) * 2 - 1;
     };
     const loop = () => {
+      if (disposed) return;
       cur.x += (tgt.x - cur.x) * 0.06;
       cur.y += (tgt.y - cur.y) * 0.06;
       stage.style.perspectiveOrigin = `${(50 + cur.x * 14).toFixed(2)}% ${(50 + cur.y * 12).toFixed(2)}%`;
@@ -173,6 +178,8 @@ export default function WhoTunnel() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => {
+      disposed = true;
+      cancelAnimationFrame(scrollFrame);
       io.disconnect();
       ro.disconnect();
       cancelAnimationFrame(raf);

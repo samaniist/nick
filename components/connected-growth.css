@@ -1,0 +1,101 @@
+/* Chapter two lives on the SAME sticky stage as the hero, sharing its camera. */
+.connected-growth { position: absolute; inset: 0; z-index: 4; color: #f3f6f7; opacity: var(--connection-opacity, 0); pointer-events: none; }
+.connected-growth:not([inert]) a { pointer-events: auto; }
+.connected-growth-static { display: none; position: absolute; inset: 0; }
+.connected-growth-heading { position: absolute; top: 12%; left: 5.2%; right: 33%; transform: translateY(calc((1 - var(--connection-opacity, 0)) * 15px)); }
+.connected-growth-eyebrow { margin-bottom: 25px; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #afdae5; }
+.connected-growth h2 { font-size: clamp(26px, 3.3vw, 60px); font-weight: 400; line-height: 1.12; letter-spacing: -.045em; }
+.connected-growth h2 span { color: #a6adb6; }
+.connected-growth-disciplines { position: absolute; top: 81%; left: 4%; right: 4%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5%; list-style: none; padding: 0; margin: 0; }
+.connected-growth-disciplines li { opacity: calc(.32 + var(--reveal, 0) * .68); transform: translateY(calc((1 - var(--reveal, 0)) * 12px)); }
+.connected-growth-disciplines a { display: block; text-align: center; padding: 13px 4px; border-radius: 3px; transition: background .25s ease, color .25s ease; }
+.connected-growth-link-title { display: block; font-size: clamp(23px, 2.5vw, 43px); letter-spacing: -.035em; line-height: 1.15; }
+.connected-growth-number { color: #6edff8; margin-right: 5px; font-weight: 300; }
+.connected-growth-description { display: block; font-size: clamp(12px, 1.15vw, 18px); color: #afb9c1; margin-top: 8px; }
+.connected-growth-arrow { display: inline-block; font-size: .55em; opacity: 0; width: 0; transform: translate(-4px, 4px); transition: opacity .25s, transform .25s; }
+.connected-growth-disciplines a:hover, .connected-growth-disciplines a:focus-visible { background: rgb(124 222 245 / .045); color: #b5efff; }
+.connected-growth-disciplines a:hover .connected-growth-arrow, .connected-growth-disciplines a:focus-visible .connected-growth-arrow { opacity: 1; transform: translate(8px, -3px); }
+.connected-growth-note { display: none; }
+.hero-film { --handoff: 0; --opening-opacity: 1; --connection-opacity: 0; --scene-reframe: 0; --pointer-x: 0; --pointer-y: 0; --light-x: 50%; --light-y: 50%; }
+.hero-film[data-enhanced="true"] { height: 420svh; }
+.hero-film-opening { position: absolute; inset: 0; display: flex; flex-direction: column; opacity: var(--opening-opacity); transform: translateY(calc((1 - var(--opening-opacity)) * -18px)); }
+.hero-film-opening[inert] { pointer-events: none; }
+.hero-film .hero-film-visual { transform: perspective(1400px) translate3d(calc(var(--pointer-x) * -9px), calc(var(--pointer-y) * -6px), 0) rotateX(calc(var(--pointer-y) * -.25deg)) rotateY(calc(var(--pointer-x) * .35deg)) scale(1.018); will-change: transform; }
+.hero-film .hero-film-connection-visual { position: absolute; inset: 0; opacity: var(--handoff); }
+.hero-film .hero-film-connection-visual video { opacity: 0; }
+.hero-film .hero-film-bridge, .hero-film .hero-film-connection-poster { object-fit: cover; }
+.hero-film .hero-film-connection-poster { opacity: 0; }
+.hero-film[data-connection-ready="true"] .hero-film-connection-visual video { opacity: 1; }
+.hero-film[data-connection-failed="true"] .hero-film-connection-poster { opacity: 1; }
+.hero-film .hero-film-shade { opacity: calc(1 - var(--handoff)); }
+.hero-film-pointer-light { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: calc(var(--connection-opacity) * .3); background: radial-gradient(ellipse 35% 35% at var(--light-x) var(--light-y), rgb(93 212 247 / .10), transparent 100%); mix-blend-mode: screen; }
+.hero-film .hero-film-timeline { z-index: 10; }
+@media (min-width: 768px) and (max-height: 800px) {
+  .hero-film .hero-film-timeline { bottom: 12px; padding-top: 12px; }
+}
+@media (min-aspect-ratio: 2/1) {
+  .hero-film .hero-film-bridge, .hero-film .hero-film-connection-poster { object-fit: contain; }
+  .connected-growth-heading { top: 8%; }
+  .connected-growth-disciplines { top: 77%; }
+}
+@media (max-width: 767px) {
+  .hero-film[data-enhanced="true"] { height: 380svh; }
+  .hero-film .hero-film-visual {
+    top: calc(24% + var(--scene-reframe) * 7%);
+    bottom: auto;
+    height: calc(73svh * (1 - var(--scene-reframe)) + 56.25vw * var(--scene-reframe));
+    left: calc(-45% + var(--scene-reframe) * 45%);
+    right: calc(-4% + var(--scene-reframe) * 4%);
+  }
+  .hero-film .hero-film-connection-visual video, .hero-film .hero-film-bridge, .hero-film .hero-film-connection-poster { object-fit: cover; object-position: calc(78% - var(--scene-reframe) * 28%) center; }
+  .connected-growth-heading { top: 10%; left: 24px; right: 24px; }
+  .connected-growth-eyebrow { font-size: 8px; letter-spacing: .24em; margin-bottom: 18px; }
+  .connected-growth h2 { font-size: clamp(29px, 7.8vw, 48px); max-width: 550px; line-height: 1.12; }
+  .connected-growth h2 span { display: inline-block; margin-top: 7px; }
+  .connected-growth-disciplines { top: 65%; left: 24px; right: 24px; gap: 0; grid-template-columns: 1fr; }
+  .connected-growth-disciplines a { display: flex; align-items: center; justify-content: space-between; text-align: left; padding: 13px 0; border-top: 1px solid #b7eaff26; gap: 15px; }
+  .connected-growth-link-title { font-size: 20px; white-space: nowrap; }
+  .connected-growth-number { font-size: 12px; margin-right: 8px; }
+  .connected-growth-description { font-size: 10px; margin-top: 0; text-align: right; max-width: 120px; }
+  .connected-growth-arrow { display: none; }
+}
+@media (max-height: 650px) and (min-width: 768px) {
+  .connected-growth-heading { top: 7%; }
+  .connected-growth-eyebrow { margin-bottom: 12px; }
+  .connected-growth h2 { font-size: 30px; }
+  .connected-growth-disciplines { top: 75%; }
+  .connected-growth-link-title { font-size: 25px; }
+  .connected-growth-description { font-size: 12px; }
+}
+/* A complete readable story without scripting, or with motion disabled. */
+.hero-film:not([data-enhanced="true"]), .hero-film[data-reduced="true"] { height: auto; }
+.hero-film:not([data-enhanced="true"]) .hero-film-stage, .hero-film[data-reduced="true"] .hero-film-stage { height: auto; position: relative; overflow: hidden; }
+.hero-film:not([data-enhanced="true"]) .hero-film-opening, .hero-film[data-reduced="true"] .hero-film-opening { position: relative; min-height: 100svh; opacity: 1; transform: none; }
+.hero-film:not([data-enhanced="true"]) .hero-film-visual, .hero-film[data-reduced="true"] .hero-film-visual { top: 0; bottom: auto; height: 100svh; transform: none; }
+.hero-film:not([data-enhanced="true"]) .hero-film-shade, .hero-film[data-reduced="true"] .hero-film-shade { height: 100svh; opacity: 1; }
+.hero-film:not([data-enhanced="true"]) .connected-growth, .hero-film[data-reduced="true"] .connected-growth { position: relative; min-height: max(700px, 100svh); opacity: 1; pointer-events: auto; background: #000; }
+.hero-film:not([data-enhanced="true"]) .connected-growth-static, .hero-film[data-reduced="true"] .connected-growth-static { display: block; position: absolute; inset: 0; }
+.connected-growth-static img { width: 100%; height: 100%; object-fit: contain; }
+.hero-film:not([data-enhanced="true"]) .connected-growth-heading, .hero-film[data-reduced="true"] .connected-growth-heading { transform: none; }
+.hero-film:not([data-enhanced="true"]) .connected-growth-disciplines li, .hero-film[data-reduced="true"] .connected-growth-disciplines li { opacity: 1; transform: none; }
+.hero-film:not([data-enhanced="true"]) .hero-film-timeline, .hero-film[data-reduced="true"] .hero-film-timeline,
+.hero-film:not([data-enhanced="true"]) .hero-film-pointer-light, .hero-film[data-reduced="true"] .hero-film-pointer-light { display: none; }
+@media (max-width: 767px) {
+  .connected-growth-static { max-height: 65%; padding-top: 27%; }
+  .connected-growth-static img { object-position: center bottom; }
+}
+/* Match the later chapters: quiet labels, cyan editorial accent, clear links. */
+.connected-growth-heading{left:7%;right:24%}
+.connected-growth-eyebrow{color:#8fa8b2;letter-spacing:.22em;font-weight:400}
+.connected-growth h2{font-size:clamp(30px,3.65vw,62px);font-weight:450;line-height:1.07;letter-spacing:-.06em;color:#edfaff}
+.connected-growth h2 span{color:#b2dce7}
+.connected-growth-disciplines{left:7%;right:7%;top:79%;gap:4%}
+.connected-growth-disciplines a{position:relative;text-align:left;padding:16px 0 12px;border-radius:0;border-top:1px solid #b8eaf436;background:transparent}
+.connected-growth-link-title{display:flex;align-items:center;gap:12px;font-size:clamp(22px,2.1vw,33px);font-weight:450;letter-spacing:-.045em;line-height:1.2}
+.connected-growth-number{font-size:10px;color:#8fcbdc;letter-spacing:.05em;margin:0;font-weight:400}
+.connected-growth-arrow{display:grid;place-items:center;flex-shrink:0;width:32px;height:32px;margin-left:auto;border:1px solid #b8eaf43b;border-radius:50%;color:#b2e9f3;font-size:20px;opacity:1;transform:none;transition:transform .25s,background .25s,border-color .25s}
+.connected-growth-description{font-size:12px;color:#91a6b0;line-height:1.6;margin-top:9px;padding-left:26px}
+.connected-growth-disciplines a:hover,.connected-growth-disciplines a:focus-visible{background:transparent;color:#d5f2f8;border-color:#b2e9f3}
+.connected-growth-disciplines a:hover .connected-growth-arrow,.connected-growth-disciplines a:focus-visible .connected-growth-arrow{transform:translate(2px,-2px);background:#15303b;border-color:#b2e9f3}
+@media(max-width:767px){.connected-growth-heading{left:7%;right:7%;top:10%}.connected-growth h2{font-size:clamp(28px,7.5vw,48px)}.connected-growth-disciplines{top:65%;left:7%;right:7%;gap:0}.connected-growth-disciplines a{display:block;padding:10px 0}.connected-growth-link-title{font-size:21px;gap:10px}.connected-growth-arrow{width:28px;height:28px;font-size:18px}.connected-growth-description{font-size:10px;text-align:left;max-width:none;margin-top:2px;padding-left:24px}.connected-growth-eyebrow{font-size:8px;margin-bottom:18px}}
+@media(max-height:650px) and (min-width:768px){.connected-growth-disciplines{top:75%}.connected-growth h2{font-size:32px}.connected-growth-link-title{font-size:24px}.connected-growth-description{font-size:11px;margin-top:5px}.connected-growth-disciplines a{padding-top:10px}}
