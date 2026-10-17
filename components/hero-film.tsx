@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDown } from "./icons";
 import Image from "next/image";
 import { useEffect, useRef, type ReactNode } from "react";
 import ConnectedGrowth from "@/components/connected-growth";
@@ -25,6 +26,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
   const journeyVideo = useRef<HTMLVideoElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const chapter = useRef<HTMLSpanElement>(null);
+  const skipLabel = useRef<HTMLSpanElement>(null);
   const skip = useRef<HTMLAnchorElement>(null);
 
   useEffect(() => {
@@ -86,7 +88,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       if (showNext && focusChapter === nextContent) { nextContent.focus({ preventScroll: true }); focusChapter = null; }
       if (skip.current) {
         skip.current.href = showNext ? "#hero-clients" : "#connected-growth";
-        skip.current.textContent = showNext ? "Explore the studio ↓" : "See how it connects ↓";
+        skipLabel.current!.textContent = showNext ? "Explore the studio" : "See how it connects";
       }
     };
     const paint = () => {
@@ -162,7 +164,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       updateContent(displayed >= 0.485);
       if (displayed >= 1.03 && !reduced.matches) { nextContent.inert = true; nextContent.setAttribute("aria-hidden", "true"); }
       else if (displayed >= .485) { nextContent.inert = false; nextContent.setAttribute("aria-hidden", "false"); }
-      if (skip.current && displayed >= .485) { skip.current.href = displayed < 1.03 ? "#selected-work" : displayed < 1.55 ? "#next-chapter" : displayed < 2.08 ? "#growth-journey" : "#hero-clients"; skip.current.textContent = displayed < 1.03 ? "Explore selected work ↓" : displayed < 1.55 ? "Your next chapter ↓" : displayed < 2.08 ? "See the bigger picture ↓" : "Start a conversation ↓"; }
+      if (skip.current && displayed >= .485) { skip.current.href = displayed < 1.03 ? "#selected-work" : displayed < 1.55 ? "#next-chapter" : displayed < 2.08 ? "#growth-journey" : "#hero-clients"; skipLabel.current!.textContent = displayed < 1.03 ? "Explore selected work" : displayed < 1.55 ? "Your next chapter" : displayed < 2.08 ? "See the bigger picture" : "Start a conversation"; }
       seek();
     };
     const tick = (now: number) => {
@@ -303,7 +305,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
           <span ref={chapter} aria-hidden="true">01 / The possibility</span>
           <div aria-hidden="true"><span ref={bar} /></div>
           <span className="hero-film-instruction">Scroll to connect</span>
-          <a ref={skip} href="#connected-growth">See how it connects ↓</a>
+          <a ref={skip} href="#connected-growth"><span ref={skipLabel}>See how it connects</span><ArrowDown/></a>
         </div>
       </div>
     </section>

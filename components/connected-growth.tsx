@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "./icons";
 import Image from "next/image";
 import Link from "next/link";
 import type { RefObject } from "react";
@@ -24,7 +25,7 @@ export default function ConnectedGrowth({ sectionRef }: { sectionRef: RefObject<
         {disciplines.map((item, index) => (
           <li key={item.name} data-discipline={index}>
             <Link href={item.href} aria-label={`Explore ${item.name} services`}>
-              <span className="connected-growth-link-title"><span className="connected-growth-number">0{index + 1}</span> {item.name}<span className="connected-growth-arrow" aria-hidden="true">↗</span></span>
+              <span className="connected-growth-link-title"><span className="connected-growth-number">0{index + 1}</span> {item.name}<span className="connected-growth-arrow" aria-hidden="true"><ArrowUpRight/></span></span>
               <span className="connected-growth-description">{item.line}</span>
             </Link>
           </li>

@@ -66,3 +66,11 @@
 @media (max-width:767px) and (min-height:701px) {
   .hero-film .selected-work .work-device-wrap { top:calc(55% + var(--next-progress,0)*3%); }
 }
+/* The device's rectangular photo must never cover chapter-four controls. */
+.hero-film .next-chapter { z-index:4; pointer-events:none; }
+.hero-film .next-chapter:not([inert]) .next-paths { pointer-events:auto; }
+.hero-film .hero-film-timeline a { display:inline-flex; align-items:center; gap:8px; }
+.hero-film .hero-film-timeline a>svg { width:12px; height:12px; flex-shrink:0; }
+.hero-film .hero-film-cta a>span>svg,
+.hero-film .connected-growth-arrow>svg,
+.hero-film .next-path-arrow>svg { width:1em; height:1em; }

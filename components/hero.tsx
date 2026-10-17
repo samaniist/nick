@@ -1,3 +1,4 @@
+import { ArrowUpRight } from "./icons";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -68,7 +69,7 @@ export default function Hero({ showClients = true }: { showClients?: boolean }) 
         <p className="hero-film-tags">Brand. Web. Performance.</p>
         <div className="hero-film-cta mt-7">
           <Magnetic>
-            <Link href="/contact" className="inline-flex items-center gap-8 rounded-[3px] bg-white px-6 py-3.5 text-[14px] font-medium text-black transition-colors hover:bg-zinc-200">Build your next chapter <span aria-hidden="true">↗</span></Link>
+            <Link href="/contact" className="inline-flex items-center gap-8 rounded-[3px] bg-white px-6 py-3.5 text-[14px] font-medium text-black transition-colors hover:bg-zinc-200">Build your next chapter <span aria-hidden="true"><ArrowUpRight/></span></Link>
           </Magnetic>
         </div>
       </div>

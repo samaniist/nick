@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowUpRight, ArrowDown } from "./icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type PointerEvent, type RefObject } from "react";
@@ -8,10 +9,10 @@ import NextChapter, { BrandPreview, SystemsPreview, LeadsPreview, growthPaths } 
 
 function CommerceOverview() {
   return <div className="commerce-overview" aria-label="Illustrative commerce dashboard: sales up 28.4 percent, operating costs down 18 percent. Demo data, not client results.">
-    <header><span className="commerce-brand">N<span>↗</span></span><span>Nexlytic <b>/ Commerce overview</b></span><small>DEMO DATA</small></header>
-    <div className="commerce-summary"><div><p>Total revenue <span>↗ 28.4%</span></p><strong>€128,400<span>.00</span></strong><small>Across all your sales channels</small></div><div className="commerce-cost"><p>Operating costs</p><strong>€24,600</strong><span>↓ 18.0% vs. previous period</span></div></div>
+    <header><span className="commerce-brand">N<span><ArrowUpRight/></span></span><span>Nexlytic <b>/ Commerce overview</b></span><small>DEMO DATA</small></header>
+    <div className="commerce-summary"><div><p>Total revenue <span><ArrowUpRight/> 28.4%</span></p><strong>€128,400<span>.00</span></strong><small>Across all your sales channels</small></div><div className="commerce-cost"><p>Operating costs</p><strong>€24,600</strong><span><ArrowDown/> 18.0% vs. previous period</span></div></div>
     <div className="commerce-chart"><div className="commerce-chart-heading"><span>Growth, connected.</span><small>LAST 6 MONTHS</small></div><svg viewBox="0 0 600 155" fill="none" aria-hidden="true"><defs><linearGradient id="commerce-fill" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#61e6f7" stopOpacity=".23"/><stop offset="1" stopColor="#61e6f7" stopOpacity="0"/></linearGradient><linearGradient id="commerce-line"><stop stopColor="#347d9a"/><stop offset=".55" stopColor="#67e8f9"/><stop offset="1" stopColor="#c4fff0"/></linearGradient></defs>{[25,65,105,145].map(y=><path key={y} d={`M0 ${y} H600`} stroke="#ffffff" strokeOpacity=".06"/>)}<path d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5 V155 H0Z" fill="url(#commerce-fill)"/><path className="commerce-line-glow" d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5" stroke="#62e7f4" strokeWidth="6"/><path className="commerce-line" d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5" stroke="url(#commerce-line)" strokeWidth="2.5" pathLength="1"/><path className="commerce-flow" d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5" stroke="#ecffff" strokeWidth="3.5" pathLength="1"/><circle className="commerce-endpoint" cx="596" cy="7" r="4" fill="#c4fff0"/></svg><div className="commerce-months">{['Jan','Feb','Mar','Apr','May','Jun'].map(m=><span key={m}>{m}</span>)}</div></div>
-    <div className="commerce-channels">{[{name:'Amazon',amount:'€64,200',share:'50%',icon:'a'},{name:'Online shop',amount:'€44,940',share:'35%',icon:'↗'},{name:'eBay',amount:'€19,260',share:'15%',icon:'e'}].map(c=><div key={c.name}><i>{c.icon}</i><span>{c.name}<strong>{c.amount}</strong></span><small>{c.share}</small></div>)}</div>
+    <div className="commerce-channels">{[{name:'Amazon',amount:'€64,200',share:'50%',icon:'a'},{name:'Online shop',amount:'€44,940',share:'35%',icon:<ArrowUpRight/>},{name:'eBay',amount:'€19,260',share:'15%',icon:'e'}].map(c=><div key={c.name}><i>{c.icon}</i><span>{c.name}<strong>{c.amount}</strong></span><small>{c.share}</small></div>)}</div>
     <footer><span className="commerce-live-feed"><i/><span>Amazon · New order €129</span><span>Online shop · New order €249</span><span>eBay · New order €89</span></span><span>Illustrative demo · Not client results</span></footer>
   </div>;
 }
