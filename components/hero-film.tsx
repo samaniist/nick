@@ -1,5 +1,6 @@
 "use client";
 
+import { createScrollVideo } from "@/lib/scroll-video";
 import { ArrowDown } from "./icons";
 import Image from "next/image";
 import { useEffect, useRef, type ReactNode } from "react";
@@ -66,16 +67,12 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       nextFilm.src = CONNECTION;
       nextFilm.load();
     };
-    // Short-GOP encodes and a single outstanding seek keep reverse scrubbing responsive.
-    const seekFilm = (element: HTMLVideoElement, progress: number) => {
-      if (disposed || !active || reduced.matches || element.readyState < 2 || element.seeking) return;
-      const time = progress * Math.max(0, element.duration - 1 / 24);
-      if (Number.isFinite(time) && Math.abs(element.currentTime - time) > 0.025) element.currentTime = time;
-    };
+    const canSeek = () => !disposed && active && !document.hidden && !reduced.matches;
+    const scrubs = [film, nextFilm, journeyFilm].map(element => createScrollVideo(element, canSeek));
     const seek = () => {
-      seekFilm(film, clamp(displayed / 0.43));
-      seekFilm(nextFilm, clamp((displayed - 0.49) / 0.43));
-      seekFilm(journeyFilm, clamp((displayed - 2.22) / 1.03));
+      scrubs[0].setProgress(clamp(displayed / 0.43));
+      scrubs[1].setProgress(clamp((displayed - 0.49) / 0.43));
+      scrubs[2].setProgress(clamp((displayed - 2.22) / 1.03));
     };
     const updateContent = (showNext: boolean) => {
       if (connectionVisible === showNext && root.dataset.enhanced === "true") return;
@@ -224,7 +221,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
     const visibility = () => {
       lastTime = 0;
       if (document.hidden) { cancelAnimationFrame(frame); frame = 0; }
-      else measure();
+      else { measure(); displayed = target; paint(); }
     };
     const jumpChapter = (event: MouseEvent) => {
       const destination = skip.current?.getAttribute("href");
@@ -240,19 +237,21 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
     const observer = new IntersectionObserver(([entry]) => {
       active = entry.isIntersecting;
       root.dataset.active = String(active);
-      if (active) measure();
+      if (active) {
+        // Resume at the actual scroll position, not the last offscreen frame.
+        measure();
+        displayed = target;
+        lastTime = 0;
+        paint();
+      }
       else { workContent.dataset.playing = "false"; cancelAnimationFrame(frame); frame = 0; lastTime = 0; }
     });
     const resize = new ResizeObserver(measure);
     observer.observe(root);
     resize.observe(root);
-    journeyFilm.addEventListener("loadeddata", seek);
-    journeyFilm.addEventListener("seeked", seek);
     film.addEventListener("loadeddata", ready);
-    film.addEventListener("seeked", seek);
     film.addEventListener("error", fail);
     nextFilm.addEventListener("loadeddata", nextReady);
-    nextFilm.addEventListener("seeked", seek);
     nextFilm.addEventListener("error", nextFail);
     reduced.addEventListener("change", configure);
     finePointer.addEventListener("change", resetPointer);
@@ -271,9 +270,9 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       clearTimeout(prefetch);
       cancelAnimationFrame(frame);
       observer.disconnect(); resize.disconnect();
-      journeyFilm.removeEventListener("loadeddata", seek); journeyFilm.removeEventListener("seeked", seek);
-      film.removeEventListener("loadeddata", ready); film.removeEventListener("seeked", seek); film.removeEventListener("error", fail);
-      nextFilm.removeEventListener("loadeddata", nextReady); nextFilm.removeEventListener("seeked", seek); nextFilm.removeEventListener("error", nextFail);
+      scrubs.forEach(scrub => scrub.dispose());
+      film.removeEventListener("loadeddata", ready); film.removeEventListener("error", fail);
+      nextFilm.removeEventListener("loadeddata", nextReady); nextFilm.removeEventListener("error", nextFail);
       reduced.removeEventListener("change", configure); finePointer.removeEventListener("change", resetPointer);
       root.removeEventListener("pointermove", pointerMove); root.removeEventListener("pointerleave", resetPointer);
       skipLink?.removeEventListener("click", jumpChapter);
