@@ -1,7 +1,6 @@
 "use client";
 
 import type { GlassLens } from "@/lib/glass-lens";
-import type { GlassTransition } from "@/lib/glass-transition";
 import { createScrollVideo } from "@/lib/scroll-video";
 import { trackScrollSkew } from "@/lib/scroll-skew";
 import { ArrowDown } from "./icons";
@@ -35,7 +34,6 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
   const skipLabel = useRef<HTMLSpanElement>(null);
   const skip = useRef<HTMLAnchorElement>(null);
   const lensCanvas = useRef<HTMLCanvasElement>(null);
-  const shatterCanvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const root = scene.current!;
@@ -69,8 +67,6 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
     let focusChapter: HTMLElement | null = null;
     let lens: GlassLens | null = null;
     let lensRequested = false;
-    let shatter: GlassTransition | null = null;
-    let shatterRequested = false;
 
     const loadConnection = () => {
       if (hasNext || reduced.matches || failedNext) return;
@@ -183,10 +179,6 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       else if (displayed >= .485) { nextContent.inert = false; nextContent.setAttribute("aria-hidden", "false"); }
       if (skip.current && displayed >= .485) { skip.current.href = displayed < 1.03 ? "#selected-work" : displayed < 1.55 ? "#next-chapter" : displayed < 2.08 ? "#growth-journey" : "#hero-clients"; skipLabel.current!.textContent = displayed < 1.03 ? "Explore selected work" : displayed < 1.55 ? "Your next chapter" : displayed < 2.08 ? "See the bigger picture" : "Start a conversation"; }
       lens?.setEnabled(displayed < 0.4 && active && !reduced.matches);
-      // Glass-shatter handoff into chapter two; the CSS crossfade stays as the fallback underneath.
-      const shatterProgress = smooth((displayed - 0.41) / 0.09);
-      const shattering = !!shatter && !reduced.matches && shatterProgress > 0 && shatterProgress < 1 && shatter.setProgress(shatterProgress);
-      if (root.dataset.shatter !== String(shattering)) root.dataset.shatter = String(shattering);
       seek();
     };
     const tick = (now: number) => {
@@ -211,15 +203,6 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       const distance = Math.max(1, root.offsetHeight - stageHeight);
       target = reduced.matches ? 0 : clamp(-rect.top / distance) * 3.35;
       if (target > 0.08) loadConnection();
-      if (target > 0.15 && !shatterRequested && !reduced.matches && shatterCanvas.current) {
-        shatterRequested = true;
-        const bridge = root.querySelector<HTMLImageElement>(".hero-film-bridge");
-        void import("@/lib/glass-transition").then(({ createGlassTransition }) => {
-          if (disposed || !shatterCanvas.current) return;
-          shatter = createGlassTransition(shatterCanvas.current, film, () => (readyNext ? nextFilm : bridge));
-          schedule();
-        });
-      }
       if (target > 1.6 && !journeyLoaded && !reduced.matches) { journeyLoaded = true; journeyFilm.src = "/media/growth-journey/v2/journey-2k.mp4"; journeyFilm.load(); }
       schedule();
     };
@@ -315,7 +298,6 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       clearTimeout(prefetch);
       stopSkew();
       lens?.dispose();
-      shatter?.dispose();
       cancelAnimationFrame(frame);
       observer.disconnect(); resize.disconnect();
       scrubs.forEach(scrub => scrub.dispose());
@@ -343,7 +325,6 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
             <video ref={connectionVideo} muted playsInline preload="auto" tabIndex={-1} disablePictureInPicture aria-hidden="true" />
             <div className="hero-film-focus" />
           </div>
-          <canvas ref={shatterCanvas} className="hero-film-shatter" aria-hidden="true" />
         </div>
         <div className="hero-film-shade" aria-hidden="true" />
         <div className="hero-film-pointer-light" aria-hidden="true" />
