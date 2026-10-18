@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import HeroFilm from "@/components/hero-film";
 import Magnetic from "@/components/magnetic";
+import ReactiveTitle from "@/components/reactive-title";
 
 /* Client logos, all rendered as flat light-gray marks on transparent
    backgrounds via brightness-0 invert. */
@@ -65,7 +66,7 @@ export default function Hero({ showClients = true }: { showClients?: boolean }) 
 
       <div className="hero-film-copy relative z-10 flex flex-1 flex-col justify-center px-6 sm:px-10 lg:pl-20">
         <p className="hero-film-eyebrow">Munich · Digital growth studio</p>
-        <h1 className="hero-film-title">Built for<br />what’s<br /><span>next.</span></h1>
+        <ReactiveTitle className="hero-film-title" lines={[{ text: "Built for" }, { text: "what’s" }, { text: "next.", accent: true }]} />
         <p className="hero-film-tags">Brand. Web. Performance.</p>
         <div className="hero-film-cta mt-7">
           <Magnetic>

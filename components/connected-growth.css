@@ -5,7 +5,7 @@
 .connected-growth-heading { position: absolute; top: 12%; left: 5.2%; right: 33%; transform: translateY(calc((1 - var(--connection-opacity, 0)) * 15px)); }
 .connected-growth-eyebrow { margin-bottom: 25px; font-size: 10px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; color: #afdae5; }
 .connected-growth h2 { font-size: clamp(26px, 3.3vw, 60px); font-weight: 400; line-height: 1.12; letter-spacing: -.045em; }
-.connected-growth h2 span { color: #a6adb6; }
+.connected-growth h2 .cg-accent { color: #a6adb6; }
 .connected-growth-disciplines { position: absolute; top: 81%; left: 4%; right: 4%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5%; list-style: none; padding: 0; margin: 0; }
 .connected-growth-disciplines li { opacity: calc(.32 + var(--reveal, 0) * .68); transform: translateY(calc((1 - var(--reveal, 0)) * 12px)); }
 .connected-growth-disciplines a { display: block; text-align: center; padding: 13px 4px; border-radius: 3px; transition: background .25s ease, color .25s ease; }
@@ -51,7 +51,7 @@
   .connected-growth-heading { top: 10%; left: 24px; right: 24px; }
   .connected-growth-eyebrow { font-size: 8px; letter-spacing: .24em; margin-bottom: 18px; }
   .connected-growth h2 { font-size: clamp(29px, 7.8vw, 48px); max-width: 550px; line-height: 1.12; }
-  .connected-growth h2 span { display: inline-block; margin-top: 7px; }
+  .connected-growth h2 .cg-accent { margin-top: 7px; }
   .connected-growth-disciplines { top: 65%; left: 24px; right: 24px; gap: 0; grid-template-columns: 1fr; }
   .connected-growth-disciplines a { display: flex; align-items: center; justify-content: space-between; text-align: left; padding: 13px 0; border-top: 1px solid #b7eaff26; gap: 15px; }
   .connected-growth-link-title { font-size: 20px; white-space: nowrap; }
@@ -88,7 +88,12 @@
 .connected-growth-heading{left:7%;right:24%}
 .connected-growth-eyebrow{color:#8fa8b2;letter-spacing:.22em;font-weight:400}
 .connected-growth h2{font-size:clamp(30px,3.65vw,62px);font-weight:450;line-height:1.07;letter-spacing:-.06em;color:#edfaff}
-.connected-growth h2 span{color:#b2dce7}
+.connected-growth h2 .cg-accent{color:#b2dce7}
+/* Heading lines rise out of a mask as the chapter arrives (--connection-reveal from hero-film). */
+.connected-growth .reveal-line{display:block;overflow:hidden;padding-bottom:.12em;margin-bottom:-.12em}
+.connected-growth .reveal-line>span{display:block;transform:translateY(calc((1 - clamp(0, var(--connection-reveal, 1) * 1.6, 1)) * 110%))}
+.connected-growth .reveal-line+.reveal-line>span{transform:translateY(calc((1 - clamp(0, var(--connection-reveal, 1) * 1.6 - .6, 1)) * 110%))}
+.hero-film:is([data-reduced="true"], :not([data-enhanced="true"])) .connected-growth .reveal-line>span{transform:none}
 .connected-growth-disciplines{left:7%;right:7%;top:79%;gap:4%}
 .connected-growth-disciplines a{position:relative;text-align:left;padding:16px 0 12px;border-radius:0;border-top:1px solid #b8eaf436;background:transparent}
 .connected-growth-link-title{display:flex;align-items:center;gap:12px;font-size:clamp(22px,2.1vw,33px);font-weight:450;letter-spacing:-.045em;line-height:1.2}
@@ -99,3 +104,14 @@
 .connected-growth-disciplines a:hover .connected-growth-arrow,.connected-growth-disciplines a:focus-visible .connected-growth-arrow{transform:translate(2px,-2px);background:#15303b;border-color:#b2e9f3}
 @media(max-width:767px){.connected-growth-heading{left:7%;right:7%;top:10%}.connected-growth h2{font-size:clamp(28px,7.5vw,48px)}.connected-growth-disciplines{top:65%;left:7%;right:7%;gap:0}.connected-growth-disciplines a{display:block;padding:10px 0}.connected-growth-link-title{font-size:21px;gap:10px}.connected-growth-arrow{width:28px;height:28px;font-size:18px}.connected-growth-description{font-size:12px;text-align:left;max-width:none;margin-top:2px;padding-left:24px}.connected-growth-eyebrow{font-size:10px;margin-bottom:18px}}
 @media(max-height:650px) and (min-width:768px){.connected-growth-disciplines{top:75%}.connected-growth h2{font-size:32px}.connected-growth-link-title{font-size:24px}.connected-growth-description{font-size:11px;margin-top:5px}.connected-growth-disciplines a{padding-top:10px}}
+
+/* Hovering or focusing a discipline lights its object in the scene (Brand → panel, Web → devices,
+   Performance → chart). The layer mirrors the video's object-fit box so the spots stay on the objects. */
+.hero-film .hero-film-connection-visual { container-type: size; }
+.hero-film-focus { --w: max(100cqw, 177.78cqh); --h: max(100cqh, 56.25cqw); --fx: .5; position: absolute; width: var(--w); height: var(--h); left: calc((100cqw - var(--w)) * var(--fx)); top: calc((100cqh - var(--h)) / 2); pointer-events: none; opacity: 0; transition: opacity .45s ease; background: radial-gradient(ellipse 17% 27% at var(--spot-x, 50%) var(--spot-y, 62%), rgb(120 225 250 / .22), rgb(120 225 250 / .06) 45%, transparent 70%), radial-gradient(ellipse 22% 34% at var(--spot-x, 50%) var(--spot-y, 62%), transparent 55%, rgb(0 0 0 / .5)); }
+.hero-film:has([data-discipline="0"] a:is(:hover, :focus-visible)) .hero-film-focus { --spot-x: 18%; --spot-y: 62%; opacity: 1; }
+.hero-film:has([data-discipline="1"] a:is(:hover, :focus-visible)) .hero-film-focus { --spot-x: 51.5%; --spot-y: 63%; opacity: 1; }
+.hero-film:has([data-discipline="2"] a:is(:hover, :focus-visible)) .hero-film-focus { --spot-x: 83%; --spot-y: 64%; opacity: 1; }
+@media (min-aspect-ratio: 2/1) { .hero-film-focus { --w: min(100cqw, 177.78cqh); --h: min(100cqh, 56.25cqw); --fx: 1; } }
+@media (max-width: 767px) { .hero-film .hero-film-focus { --fx: calc(.78 - var(--scene-reframe) * .28); } }
+@media (prefers-reduced-motion: reduce) { .hero-film-focus { transition: none; } }

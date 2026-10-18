@@ -19,7 +19,7 @@ export default function ConnectedGrowth({ sectionRef }: { sectionRef: RefObject<
       </div>
       <div className="connected-growth-heading">
         <p className="connected-growth-eyebrow">02 / Connected growth</p>
-        <h2 id="connected-growth-title">Everything connects.<br /><span>Your business moves forward.</span></h2>
+        <h2 id="connected-growth-title"><span className="reveal-line"><span>Everything connects.</span></span><span className="reveal-line"><span className="cg-accent">Your business moves forward.</span></span></h2>
       </div>
       <ol className="connected-growth-disciplines">
         {disciplines.map((item, index) => (

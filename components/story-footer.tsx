@@ -6,43 +6,47 @@ import Link from "next/link";
 import { Mrs_Saint_Delafield } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
 import ContactForm from "@/components/contact/contact-form";
+import FooterParticles from "@/components/footer-particles";
+import { trackScrollSkew } from "@/lib/scroll-skew";
 import "./story-footer.css";
 
 const signatureFont = Mrs_Saint_Delafield({ weight: "400", subsets: ["latin"], display: "swap" });
 
 export default function StoryFooter() {
   const root = useRef<HTMLElement>(null);
-  const film = useRef<HTMLVideoElement>(null);
+  const wordmark = useRef<HTMLDivElement>(null);
+  const heading = useRef<HTMLElement>(null);
   const [paused, setPaused] = useState(false);
   useEffect(() => {
     const footer = root.current!;
-    const video = film.current!;
-    const reduced = matchMedia("(prefers-reduced-motion: reduce)");
-    let visible = false;
-    const playback = () => {
-      if (visible && !paused && !reduced.matches && !document.hidden) {
-        if (!video.getAttribute("src")) { video.src = "/media/footer/ambient-loop.mp4"; video.load(); }
-        void video.play().catch(() => {});
-      } else video.pause();
-    };
-    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; playback(); }, { rootMargin: "150px" });
-    observer.observe(footer);
-    reduced.addEventListener("change", playback);
-    document.addEventListener("visibilitychange", playback);
-    return () => { observer.disconnect(); reduced.removeEventListener("change", playback); document.removeEventListener("visibilitychange", playback); video.pause(); };
-  }, [paused]);
+    const stopSkew = trackScrollSkew(footer);
+    // Reveal the opening lines once they scroll into view (only armed when JS and motion are available).
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return stopSkew;
+    footer.dataset.reveal = "armed";
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      footer.dataset.reveal = "done";
+      observer.disconnect();
+    }, { threshold: 0.4 });
+    observer.observe(heading.current!);
+    return () => { stopSkew(); observer.disconnect(); delete footer.dataset.reveal; };
+  }, []);
 
   return <footer ref={root} id="hero-clients" className="story-footer" onPointerMove={e => {
     if (e.pointerType !== "mouse") return;
     const r = e.currentTarget.getBoundingClientRect();
     e.currentTarget.style.setProperty("--footer-light", `${((e.clientX-r.left)/r.width)*100}%`);
-  }}>
-    <div className="footer-ambient" aria-hidden="true"><video ref={film} muted loop playsInline preload="none" poster="/media/footer/poster.jpg" tabIndex={-1}/></div>
+    const mark = wordmark.current!.getBoundingClientRect();
+    e.currentTarget.style.setProperty("--wm-x", `${e.clientX - mark.left}px`);
+    e.currentTarget.style.setProperty("--wm-y", `${e.clientY - mark.top}px`);
+    e.currentTarget.style.setProperty("--wm-on", "1");
+  }} onPointerLeave={e => e.currentTarget.style.setProperty("--wm-on", "0")}>
+    <div className="footer-ambient" aria-hidden="true"><FooterParticles paused={paused}/></div>
     <div className="footer-light" aria-hidden="true"/>
     <div className="footer-inner" id="contact">
-      <header className="footer-opening">
-        <p className="footer-eyebrow"><span>06</span> / LET’S BUILD WHAT’S NEXT</p>
-        <h2>Your next chapter.<br/><em>Our next conversation.</em></h2>
+      <header ref={heading} className="footer-opening">
+        <p className="footer-eyebrow"><span>08</span> / LET’S BUILD WHAT’S NEXT</p>
+        <h2><span className="reveal-line"><span>Your next chapter.</span></span><span className="reveal-line"><span><em>Our next conversation.</em></span></span></h2>
         <div className="footer-intro-line"><span/><p>Good things start with a conversation.</p></div>
       </header>
       <div className="footer-conversation">
@@ -67,7 +71,7 @@ export default function StoryFooter() {
         <div><span className="footer-label">GET IN TOUCH</span><a href="mailto:hello@nexlytic.de">hello@nexlytic.de</a><a href="tel:+4917670767725">+49 176 70767725</a><a href="https://wa.me/4917670767725" target="_blank" rel="noopener noreferrer">WhatsApp <ArrowUpRight/></a></div>
         <div><span className="footer-label">FIND US</span><a href="https://maps.google.com/?q=M%C3%BCnchen%2C+Deutschland" target="_blank" rel="noopener noreferrer">Munich, Germany <ArrowUpRight/></a><span className="footer-location-note">Local understanding.<br/>International perspective.</span></div>
       </div>
-      <div className="footer-wordmark" aria-label="Nexlytic">nexlytic<span aria-hidden="true"><ArrowUpRight/></span></div>
+      <div ref={wordmark} className="footer-wordmark" aria-label="Nexlytic">nexlytic<span aria-hidden="true"><ArrowUpRight/></span></div>
       <div className="footer-bottom"><p>© {new Date().getFullYear()} Nexlytic</p><button type="button" onClick={() => setPaused(p => !p)} aria-pressed={paused}>{paused ? "Play background" : "Pause background"}</button><nav aria-label="Legal information"><Link href="/datenschutz">Datenschutz</Link><Link href="/impressum">Impressum</Link><a href="#top" aria-label="Back to top"><ArrowUp/></a></nav></div>
     </div>
   </footer>;

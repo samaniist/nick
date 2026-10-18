@@ -6,15 +6,28 @@ body:has(.hero-film[data-active="true"]) .scroll-cue { opacity: 0; pointer-event
 .hero-film-visual video { position: absolute; inset: 0; opacity: 0; }
 .hero-film[data-ready="true"] .hero-film-visual video { opacity: 1; }
 .hero-film[data-failed="true"] .hero-film-first, .hero-film[data-reduced="true"] .hero-film-visual video { display: none; }
+.hero-film-lens { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.hero-film[data-failed="true"] .hero-film-lens, .hero-film[data-reduced="true"] .hero-film-lens { display: none; }
+.hero-film-shatter { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
+.hero-film[data-shatter="true"] .hero-film-shatter { opacity: 1; }
 .hero-film-shade { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, #000 0%, rgb(0 0 0 / .85) 24%, transparent 49%), linear-gradient(0deg, #000 0%, transparent 20%, transparent 85%, rgb(0 0 0 / .6)); }
 .hero-film-copy { width: 49%; padding-top: 20px; padding-bottom: 100px; }
 .hero-film-eyebrow { margin-bottom: 26px; font-size: 10px; font-weight: 500; letter-spacing: .23em; text-transform: uppercase; color: #bbb; }
 .hero-film-title { font-size: clamp(68px, 7.7vw, 136px); line-height: .94; letter-spacing: -.065em; font-weight: 600; }
-.hero-film-title span { color: #a8b3bc; }
+.hero-film-title .hero-title-accent { color: #a8b3bc; }
+.hero-title-letter { font-weight: calc(450 + var(--swell, 0) * 320); text-shadow: 0 0 calc(var(--swell, 0) * 30px) rgb(168 234 244 / calc(var(--swell, 0) * .55)); }
 .hero-film-tags { font-size: clamp(15px, 1.5vw, 23px); color: #adb5bd; margin-top: 25px; letter-spacing: -.015em; }
 .hero-film-clients { background: #000; color: #fff; padding-top: 30px; padding-bottom: 36px !important; border-top: 1px solid #ffffff14; scroll-margin-top: 0; }
 .hero-film-timeline { position: absolute; bottom: 23px; left: 4.4%; right: 4.4%; display: flex; align-items: center; gap: 20px; border-top: 1px solid #ffffff35; padding-top: 18px; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: #bac1c6; }
 .hero-film-timeline > span:first-child { min-width: 115px; }
+/* Chapter number rolls like an odometer between chapters. */
+.hero-film-odometer { display: inline-block; height: 1.25em; line-height: 1.25em; overflow: hidden; vertical-align: bottom; }
+.hero-film-odometer > span { display: flex; flex-direction: column; transform: translateY(calc(var(--chapter, 0) * -1.25em)); transition: transform .6s cubic-bezier(.65, 0, .2, 1); }
+.hero-film-chapter > span:last-child { display: inline-block; animation: chapter-label .5s ease-out; }
+@keyframes chapter-label { from { opacity: 0; transform: translateY(4px); } }
+/* Headlines lean slightly with scroll speed (set by trackScrollSkew). */
+.hero-film :is(.hero-film-title, .connected-growth h2, .work-copy h2, .next-chapter-heading h2) { transform: skewY(calc(var(--scroll-skew, 0) * 1deg)); transform-origin: left center; }
+@media (prefers-reduced-motion: reduce) { .hero-film-odometer > span, .hero-film-chapter > span:last-child { transition: none; animation: none; } }
 .hero-film-timeline > div { width: 100px; height: 1px; background: #ffffff30; }
 .hero-film-timeline > div > span { display: block; height: 100%; background: #c1f2ff; transform: scaleX(0); transform-origin: left; }
 .hero-film-instruction { margin-left: 8px; color: #9aabb5; }
@@ -66,7 +79,7 @@ body:has(.hero-film[data-active="true"]) .scroll-cue { opacity: 0; pointer-event
 /* Shared editorial typography and controls across the opening chapters. */
 .hero-film{font-family:var(--font-geist-sans),sans-serif;--story-ink:#edfaff;--story-accent:#b2dce7;--story-muted:#91a6b0}
 .hero-film .hero-film-title{font-weight:450;letter-spacing:-.065em;line-height:1.01;color:var(--story-ink)}
-.hero-film .hero-film-title span{color:var(--story-accent)}
+.hero-film .hero-film-title .hero-title-accent{color:var(--story-accent)}
 .hero-film .hero-film-eyebrow{color:#8fa8b2;letter-spacing:.22em;font-weight:400}
 .hero-film .hero-film-tags{color:var(--story-muted);font-size:clamp(14px,1.2vw,18px);letter-spacing:-.02em;line-height:1.6}
 .hero-film .hero-film-cta a{display:inline-flex;align-items:center;gap:28px;min-height:54px;padding:8px 9px 8px 23px;border:1px solid #b8eaf455;border-radius:999px;background:#d5f2f8;color:#07151c;font-size:14px;font-weight:500;letter-spacing:-.02em;transition:background .25s,box-shadow .25s,border-color .25s}

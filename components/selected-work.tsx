@@ -7,12 +7,44 @@ import { useEffect, useRef, useState, type PointerEvent, type RefObject } from "
 import "./selected-work.css";
 import NextChapter, { BrandPreview, SystemsPreview, LeadsPreview, growthPaths } from "./next-chapter";
 
+/** 0 → 1 once the laptop settles in view; resets when it leaves so every visit counts up again. */
+function useCountUp(duration = 1600) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    const host = ref.current?.closest<HTMLElement>(".selected-work");
+    if (!host) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let frame = 0, start = 0, running = false;
+    const step = (now: number) => {
+      if (!start) start = now;
+      const t = Math.min(1, (now - start) / duration);
+      setProgress(1 - Math.pow(1 - t, 4));
+      frame = t < 1 ? requestAnimationFrame(step) : 0;
+    };
+    const sync = () => {
+      const playing = host.dataset.playing === "true";
+      if (reduced.matches) { cancelAnimationFrame(frame); setProgress(1); return; }
+      if (playing && !running) { running = true; start = 0; frame = requestAnimationFrame(step); }
+      else if (!playing && running) { running = false; cancelAnimationFrame(frame); setProgress(0); }
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(host, { attributes: true, attributeFilter: ["data-playing"] });
+    queueMicrotask(sync);
+    return () => { observer.disconnect(); cancelAnimationFrame(frame); };
+  }, [duration]);
+  return [ref, progress] as const;
+}
+
+const euro = (value: number) => `€${Math.round(value).toLocaleString("en-US")}`;
+
 function CommerceOverview() {
-  return <div className="commerce-overview" aria-label="Illustrative commerce dashboard: sales up 28.4 percent, operating costs down 18 percent. Demo data, not client results.">
+  const [ref, t] = useCountUp();
+  return <div ref={ref} className="commerce-overview" aria-label="Illustrative commerce dashboard: sales up 28.4 percent, operating costs down 18 percent. Demo data, not client results.">
     <header><span className="commerce-brand">N<span><ArrowUpRight/></span></span><span>Nexlytic <b>/ Commerce overview</b></span><small>DEMO DATA</small></header>
-    <div className="commerce-summary"><div><p>Total revenue <span><ArrowUpRight/> 28.4%</span></p><strong>€128,400<span>.00</span></strong><small>Across all your sales channels</small></div><div className="commerce-cost"><p>Operating costs</p><strong>€24,600</strong><span><ArrowDown/> 18.0% vs. previous period</span></div></div>
+    <div className="commerce-summary"><div><p>Total revenue <span><ArrowUpRight/> {(28.4 * t).toFixed(1)}%</span></p><strong>{euro(128400 * t)}<span>.00</span></strong><small>Across all your sales channels</small></div><div className="commerce-cost"><p>Operating costs</p><strong>{euro(24600 * t)}</strong><span><ArrowDown/> {(18 * t).toFixed(1)}% vs. previous period</span></div></div>
     <div className="commerce-chart"><div className="commerce-chart-heading"><span>Growth, connected.</span><small>LAST 6 MONTHS</small></div><svg viewBox="0 0 600 155" fill="none" aria-hidden="true"><defs><linearGradient id="commerce-fill" x1="0" y1="0" x2="0" y2="1"><stop stopColor="#61e6f7" stopOpacity=".23"/><stop offset="1" stopColor="#61e6f7" stopOpacity="0"/></linearGradient><linearGradient id="commerce-line"><stop stopColor="#347d9a"/><stop offset=".55" stopColor="#67e8f9"/><stop offset="1" stopColor="#c4fff0"/></linearGradient></defs>{[25,65,105,145].map(y=><path key={y} d={`M0 ${y} H600`} stroke="#ffffff" strokeOpacity=".06"/>)}<path d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5 V155 H0Z" fill="url(#commerce-fill)"/><path className="commerce-line-glow" d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5" stroke="#62e7f4" strokeWidth="6"/><path className="commerce-line" d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5" stroke="url(#commerce-line)" strokeWidth="2.5" pathLength="1"/><path className="commerce-flow" d="M0 137 C40 137 46 110 90 114 S150 98 184 104 S245 68 285 79 S345 46 380 55 S450 40 476 29 S540 31 600 5" stroke="#ecffff" strokeWidth="3.5" pathLength="1"/><circle className="commerce-endpoint" cx="596" cy="7" r="4" fill="#c4fff0"/></svg><div className="commerce-months">{['Jan','Feb','Mar','Apr','May','Jun'].map(m=><span key={m}>{m}</span>)}</div></div>
-    <div className="commerce-channels">{[{name:'Amazon',amount:'€64,200',share:'50%',icon:'a'},{name:'Online shop',amount:'€44,940',share:'35%',icon:<ArrowUpRight/>},{name:'eBay',amount:'€19,260',share:'15%',icon:'e'}].map(c=><div key={c.name}><i>{c.icon}</i><span>{c.name}<strong>{c.amount}</strong></span><small>{c.share}</small></div>)}</div>
+    <div className="commerce-channels">{[{name:'Amazon',amount:64200,share:'50%',icon:'a'},{name:'Online shop',amount:44940,share:'35%',icon:<ArrowUpRight/>},{name:'eBay',amount:19260,share:'15%',icon:'e'}].map(c=><div key={c.name}><i>{c.icon}</i><span>{c.name}<strong>{euro(c.amount * t)}</strong></span><small>{c.share}</small></div>)}</div>
     <footer><span className="commerce-live-feed"><i/><span>Amazon · New order €129</span><span>Online shop · New order €249</span><span>eBay · New order €89</span></span><span>Illustrative demo · Not client results</span></footer>
   </div>;
 }
@@ -84,7 +116,7 @@ export default function SelectedWork({ sectionRef, nextRef }: { sectionRef: RefO
       <Link className="work-explore" href="/case-studies" onPointerMove={moveButton} onPointerLeave={resetButton} onMouseEnter={() => router.prefetch('/case-studies')} onNavigate={event => { event.preventDefault(); void enterWork(); }}><span className="work-cta-label">Explore our work</span><span className="work-cta-arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 18 18 6M6 6h12v12" stroke="currentColor" strokeWidth="1.5"/></svg></span></Link>
       <p className="work-footnote"><i/> Strategy meets craft. Results follow.</p>
     </div>
-    <div className="work-device-wrap"><div ref={device} className="work-device">
+    <div className="work-device-wrap"><div ref={device} className="work-device" onClick={fourth ? undefined : () => void enterWork()}>
       <div className="work-reference-scene"><div className="work-reference-photo" aria-hidden="true"/><div ref={screen} className="work-screen work-reference-screen"><div key={fourth ? goal : "commerce"} className="work-screen-content">{fourth && goal === 0 ? <BrandPreview/> : fourth && goal === 2 ? <SystemsPreview/> : fourth && goal === 3 ? <LeadsPreview/> : <CommerceOverview/>}</div><span className="work-screen-reflection" aria-hidden="true"/></div></div>
     </div><div className="work-preview-caption"><span><i/>{fourth ? `Nexlytic / ${growthPaths[goal].title}` : "Nexlytic / Commerce overview"}</span><button type="button" onClick={() => setPaused(value => !value)} aria-pressed={paused} aria-label={paused ? "Play dashboard animation" : "Pause dashboard animation"}>{paused ? "Play ▷" : "Pause Ⅱ"}</button></div></div>
     <NextChapter sectionRef={nextRef} selected={goal} onSelect={setGoal}/>

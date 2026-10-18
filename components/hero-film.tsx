@@ -1,6 +1,9 @@
 "use client";
 
+import type { GlassLens } from "@/lib/glass-lens";
+import type { GlassTransition } from "@/lib/glass-transition";
 import { createScrollVideo } from "@/lib/scroll-video";
+import { trackScrollSkew } from "@/lib/scroll-skew";
 import { ArrowDown } from "./icons";
 import Image from "next/image";
 import { useEffect, useRef, type ReactNode } from "react";
@@ -12,6 +15,7 @@ import "./mobile-story.css";
 
 const FILM = "/media/hero/digital-engine-2k.mp4";
 const CONNECTION = "/media/connected-growth/connected-growth-2k.mp4";
+const CHAPTERS = ["The possibility", "Connected growth", "Selected work", "Your next chapter", "Why Nexlytic"];
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 const smooth = (n: number) => { const t = clamp(n); return t * t * (3 - 2 * t); };
 
@@ -27,8 +31,11 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
   const journeyVideo = useRef<HTMLVideoElement>(null);
   const bar = useRef<HTMLSpanElement>(null);
   const chapter = useRef<HTMLSpanElement>(null);
+  const chapterLabel = useRef<HTMLSpanElement>(null);
   const skipLabel = useRef<HTMLSpanElement>(null);
   const skip = useRef<HTMLAnchorElement>(null);
+  const lensCanvas = useRef<HTMLCanvasElement>(null);
+  const shatterCanvas = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const root = scene.current!;
@@ -60,6 +67,10 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
     let failedHero = false;
     let connectionVisible = false;
     let focusChapter: HTMLElement | null = null;
+    let lens: GlassLens | null = null;
+    let lensRequested = false;
+    let shatter: GlassTransition | null = null;
+    let shatterRequested = false;
 
     const loadConnection = () => {
       if (hasNext || reduced.matches || failedNext) return;
@@ -146,6 +157,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       const chapterProgress = clamp((displayed - 0.49) / 0.43);
       const textReveal = smooth((displayed - 0.49) / 0.06);
       root.style.setProperty("--handoff", String(handoff));
+      root.style.setProperty("--connection-reveal", String(smooth((displayed - 0.49) / 0.12)));
       root.style.setProperty("--opening-opacity", String(1 - smooth((displayed - 0.405) / 0.055)));
       root.style.setProperty("--connection-opacity", String(textReveal * (1 - workReveal)));
       root.style.setProperty("--scene-reframe", String(smooth((displayed - 0.49) / 0.25)));
@@ -157,11 +169,24 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
         element.style.setProperty("--reveal", String(smooth((chapterProgress - 0.33 - index * 0.13) / 0.22)));
       });
       if (bar.current) bar.current.style.transform = `scaleX(${displayed / 3.35})`;
-      if (chapter.current) chapter.current.textContent = displayed < 0.43 ? "01 / The possibility" : displayed < 1.03 ? "02 / Connected growth" : displayed < 1.55 ? "03 / Selected work" : displayed < 2.08 ? "04 / Your next chapter" : "05 / Why Nexlytic";
+      const chapterIndex = displayed < 0.43 ? 0 : displayed < 1.03 ? 1 : displayed < 1.55 ? 2 : displayed < 2.08 ? 3 : 4;
+      if (chapter.current && chapter.current.dataset.chapter !== String(chapterIndex)) {
+        chapter.current.dataset.chapter = String(chapterIndex);
+        chapter.current.style.setProperty("--chapter", String(chapterIndex));
+        const label = chapterLabel.current!;
+        label.textContent = `/ ${CHAPTERS[chapterIndex]}`;
+        // Restart the label's entry animation for the new chapter.
+        label.style.animation = "none"; void label.offsetWidth; label.style.animation = "";
+      }
       updateContent(displayed >= 0.485);
       if (displayed >= 1.03 && !reduced.matches) { nextContent.inert = true; nextContent.setAttribute("aria-hidden", "true"); }
       else if (displayed >= .485) { nextContent.inert = false; nextContent.setAttribute("aria-hidden", "false"); }
       if (skip.current && displayed >= .485) { skip.current.href = displayed < 1.03 ? "#selected-work" : displayed < 1.55 ? "#next-chapter" : displayed < 2.08 ? "#growth-journey" : "#hero-clients"; skipLabel.current!.textContent = displayed < 1.03 ? "Explore selected work" : displayed < 1.55 ? "Your next chapter" : displayed < 2.08 ? "See the bigger picture" : "Start a conversation"; }
+      lens?.setEnabled(displayed < 0.4 && active && !reduced.matches);
+      // Glass-shatter handoff into chapter two; the CSS crossfade stays as the fallback underneath.
+      const shatterProgress = smooth((displayed - 0.41) / 0.09);
+      const shattering = !!shatter && !reduced.matches && shatterProgress > 0 && shatterProgress < 1 && shatter.setProgress(shatterProgress);
+      if (root.dataset.shatter !== String(shattering)) root.dataset.shatter = String(shattering);
       seek();
     };
     const tick = (now: number) => {
@@ -186,6 +211,15 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       const distance = Math.max(1, root.offsetHeight - stageHeight);
       target = reduced.matches ? 0 : clamp(-rect.top / distance) * 3.35;
       if (target > 0.08) loadConnection();
+      if (target > 0.15 && !shatterRequested && !reduced.matches && shatterCanvas.current) {
+        shatterRequested = true;
+        const bridge = root.querySelector<HTMLImageElement>(".hero-film-bridge");
+        void import("@/lib/glass-transition").then(({ createGlassTransition }) => {
+          if (disposed || !shatterCanvas.current) return;
+          shatter = createGlassTransition(shatterCanvas.current, film, () => (readyNext ? nextFilm : bridge));
+          schedule();
+        });
+      }
       if (target > 1.6 && !journeyLoaded && !reduced.matches) { journeyLoaded = true; journeyFilm.src = "/media/growth-journey/v2/journey-2k.mp4"; journeyFilm.load(); }
       schedule();
     };
@@ -216,8 +250,18 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
       pointerX = Math.max(-1, Math.min(1, ((event.clientX - rect.left) / rect.width - 0.5) * 2));
       pointerY = Math.max(-1, Math.min(1, ((event.clientY - rect.top) / rect.height - 0.5) * 2));
       schedule();
+      // The glass lens is fetched on the first real mouse movement, never on touch or reduced motion.
+      if (!lensRequested && lensCanvas.current) {
+        lensRequested = true;
+        void import("@/lib/glass-lens").then(({ createGlassLens }) => {
+          if (disposed || !lensCanvas.current) return;
+          lens = createGlassLens(lensCanvas.current, film);
+          if (lens) paint();
+        });
+      }
+      lens?.point(event.clientX, event.clientY, !(event.target as Element).closest("a, button"));
     };
-    const resetPointer = () => { pointerX = pointerY = 0; schedule(); };
+    const resetPointer = () => { pointerX = pointerY = 0; lens?.leave(); schedule(); };
     const visibility = () => {
       lastTime = 0;
       if (document.hidden) { cancelAnimationFrame(frame); frame = 0; }
@@ -263,11 +307,15 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
     window.addEventListener("resize", measure);
     document.addEventListener("visibilitychange", visibility);
     configure();
+    const stopSkew = trackScrollSkew(root);
     // Idle prefetch allows the second decoder to be ready before the transition.
     const prefetch = window.setTimeout(() => { if (!readyNext) loadConnection(); }, 1800);
     return () => {
       disposed = true;
       clearTimeout(prefetch);
+      stopSkew();
+      lens?.dispose();
+      shatter?.dispose();
       cancelAnimationFrame(frame);
       observer.disconnect(); resize.disconnect();
       scrubs.forEach(scrub => scrub.dispose());
@@ -288,11 +336,14 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
         <div className="hero-film-visual" aria-hidden="true">
           <Image src="/media/hero/digital-engine-poster.jpg" alt="" fill priority sizes="100vw" className="hero-film-poster" />
           <video ref={video} className="hero-film-first" muted playsInline preload="auto" tabIndex={-1} disablePictureInPicture aria-hidden="true" />
+          <canvas ref={lensCanvas} className="hero-film-lens" aria-hidden="true" />
           <div className="hero-film-connection-visual">
             <Image src="/media/connected-growth/start.jpg" alt="" fill sizes="100vw" className="hero-film-bridge" />
             <Image src="/media/connected-growth/poster.jpg" alt="" fill sizes="100vw" className="hero-film-connection-poster" />
             <video ref={connectionVideo} muted playsInline preload="auto" tabIndex={-1} disablePictureInPicture aria-hidden="true" />
+            <div className="hero-film-focus" />
           </div>
+          <canvas ref={shatterCanvas} className="hero-film-shatter" aria-hidden="true" />
         </div>
         <div className="hero-film-shade" aria-hidden="true" />
         <div className="hero-film-pointer-light" aria-hidden="true" />
@@ -301,7 +352,7 @@ export default function HeroFilm({ children }: { children: ReactNode }) {
         <SelectedWork sectionRef={work} nextRef={nextChapter} />
         <GrowthJourney sectionRef={journey} videoRef={journeyVideo} />
         <div className="hero-film-timeline">
-          <span ref={chapter} aria-hidden="true">01 / The possibility</span>
+          <span ref={chapter} className="hero-film-chapter" aria-hidden="true"><span className="hero-film-odometer"><span>{CHAPTERS.map((_, i) => <span key={i}>0{i + 1}</span>)}</span></span> <span ref={chapterLabel}>/ The possibility</span></span>
           <div aria-hidden="true"><span ref={bar} /></div>
           <span className="hero-film-instruction">Scroll to connect</span>
           <a ref={skip} href="#connected-growth"><span ref={skipLabel}>See how it connects</span><ArrowDown/></a>
