@@ -196,3 +196,24 @@
 @media(prefers-reduced-motion:reduce){
   .gs *,.gs *::before,.gs *::after{animation:none!important;transition:none!important}
 }
+
+/* Phone step flow (only when JS sets data-wizard): one question at a time, then the plan. */
+.gs[data-wizard] .gs-group:not([data-active]){display:none}
+.gs[data-wizard] .gs-group:focus{outline:none}
+.gs[data-wizard] .gs-engine,.gs[data-wizard] .gs-console-bar{display:none}
+.gs[data-wizard]:not([data-step="3"]) .gs-console{display:none}
+.gs[data-wizard] .gs-controls{gap:18px}
+.gs-wizard{display:flex;flex-direction:column;gap:10px}
+.gs-wizard-count{font-size:12px;color:#9fb5bd;letter-spacing:.02em}
+.gs-wizard-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.gs-wizard-bar i{height:3px;border-radius:3px;background:#b8eaf41f;transition:background .35s}
+.gs-wizard-bar i[data-done]{background:linear-gradient(90deg,#8fd9ea,#c1f2ff);box-shadow:0 0 10px #a8eaf455}
+.gs-wizard-nav{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.gs-wizard-nav button{min-height:48px;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer}
+.gs-wizard-back{padding:0 20px;border:1px solid #b9e5f133;color:#c3d4da;background:transparent}
+.gs-wizard-next{display:inline-flex;align-items:center;gap:10px;padding:0 22px;background:#d5f2f8;color:#071318;border:0}
+.gs-wizard-next svg{width:15px;height:15px}
+.gs-summary{display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid #b9e5f12b;border-radius:16px;background:linear-gradient(150deg,#0d171dd9,#05090cd9);outline:none}
+.gs-summary p{font-size:15px;line-height:1.45;color:#edfaff}
+.gs-summary button{align-self:flex-start;min-height:44px;padding:0 18px;border:1px solid #a8eaf455;border-radius:999px;color:#c1f2ff;background:transparent;font-size:14px;cursor:pointer}
+.gs[data-wizard][data-step="3"] .gs-console{margin-top:-12px}

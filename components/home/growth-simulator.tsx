@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUpRight } from "@/components/icons";
 import GrowthEngine from "./growth-simulator-engine";
 import { ChoiceIcon } from "./growth-simulator-icons";
@@ -27,6 +27,8 @@ function ChoiceGroup<T extends string>({
   options,
   value,
   onChange,
+  onPick,
+  active,
   variant,
 }: {
   n: string;
@@ -35,10 +37,13 @@ function ChoiceGroup<T extends string>({
   options: Choice<T>[];
   value: T;
   onChange: (v: T) => void;
+  /** Pointer tap on any option, including the already-selected one (drives the mobile step flow). */
+  onPick?: () => void;
+  active?: boolean;
   variant?: "stage";
 }) {
   return (
-    <fieldset className={`gs-group${variant ? ` gs-group--${variant}` : ""}`}>
+    <fieldset className={`gs-group${variant ? ` gs-group--${variant}` : ""}`} data-active={active || undefined} tabIndex={-1}>
       <legend>
         <span>{n}</span>
         {legend}
@@ -52,6 +57,7 @@ function ChoiceGroup<T extends string>({
               value={o.value}
               checked={value === o.value}
               onChange={() => onChange(o.value)}
+              onClick={(e) => { if (e.detail > 0) onPick?.(); }}
               className="gs-radio"
             />
             <span className="gs-chip-box">
@@ -114,8 +120,42 @@ export default function GrowthSimulator() {
   const plan = useMemo(() => buildPlan(input), [input]);
   const set = <K extends keyof Input>(k: K) => (v: Input[K]) => setInput((p) => ({ ...p, [k]: v }));
 
+  /* Phones get a step flow: one question per screen, then the plan. Desktop shows everything at once. */
+  const [wizard, setWizard] = useState(false);
+  // `user` marks steps the visitor took, so only those scroll and move focus.
+  const [nav, setNav] = useState({ step: 0, user: false });
+  const step = nav.step;
+  const section = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const narrow = window.matchMedia("(max-width: 767px)");
+    const sync = () => setWizard(narrow.matches);
+    sync();
+    narrow.addEventListener("change", sync);
+    return () => narrow.removeEventListener("change", sync);
+  }, []);
+  useEffect(() => {
+    if (!wizard || !nav.user) return;
+    const root = section.current!;
+    const target = root.querySelector<HTMLElement>(step === 3 ? ".gs-summary" : ".gs-wizard");
+    if (!target) return;
+    const top = target.getBoundingClientRect().top;
+    if (top < 0 || top > window.innerHeight * 0.5) {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: window.scrollY + top - 24, behavior: reduced ? "auto" : "smooth" });
+    }
+    (step === 3 ? root.querySelector<HTMLElement>(".gs-summary") : root.querySelectorAll<HTMLElement>(".gs-group")[step])?.focus({ preventScroll: true });
+  }, [nav, step, wizard]);
+  const go = (next: number) => setNav({ step: next, user: true });
+  const pick = (i: number) => () => { if (wizard) window.setTimeout(() => go(i + 1), 220); };
+  const QUESTIONS = ["Business type", "Main goal", "Current state"];
+  const answers = [
+    BUSINESSES.find((c) => c.value === input.business)!.label,
+    GOALS.find((c) => c.value === input.goal)!.label,
+    STAGES.find((c) => c.value === input.stage)!.label,
+  ];
+
   return (
-    <section id="plan" className="gs" aria-labelledby="gs-title">
+    <section ref={section} id="plan" className="gs" aria-labelledby="gs-title" data-wizard={wizard || undefined} data-step={wizard ? step : undefined}>
       <div className="gs-bg" aria-hidden="true" />
       <div className="gs-inner">
         <div className="gs-left">
@@ -135,9 +175,28 @@ export default function GrowthSimulator() {
           </header>
 
           <form className="gs-controls" onSubmit={(e) => e.preventDefault()} aria-label="Your situation">
-            <ChoiceGroup n="01" legend="Business type" name="gs-business" options={BUSINESSES} value={input.business} onChange={set("business")} />
-            <ChoiceGroup n="02" legend="Main goal" name="gs-goal" options={GOALS} value={input.goal} onChange={set("goal")} />
-            <ChoiceGroup n="03" legend="Current state" name="gs-stage" options={STAGES} value={input.stage} onChange={set("stage")} variant="stage" />
+            {wizard && step < 3 && (
+              <div className="gs-wizard">
+                <span className="gs-wizard-count">Step {step + 1} of 3 · {QUESTIONS[step]}</span>
+                <span className="gs-wizard-bar" aria-hidden="true">{[0, 1, 2].map((i) => <i key={i} data-done={i <= step || undefined} />)}</span>
+              </div>
+            )}
+            <ChoiceGroup n="01" legend="Business type" name="gs-business" options={BUSINESSES} value={input.business} onChange={set("business")} onPick={pick(0)} active={step === 0} />
+            <ChoiceGroup n="02" legend="Main goal" name="gs-goal" options={GOALS} value={input.goal} onChange={set("goal")} onPick={pick(1)} active={step === 1} />
+            <ChoiceGroup n="03" legend="Current state" name="gs-stage" options={STAGES} value={input.stage} onChange={set("stage")} onPick={pick(2)} active={step === 2} variant="stage" />
+            {wizard && step < 3 && (
+              <div className="gs-wizard-nav">
+                {step > 0 ? <button type="button" className="gs-wizard-back" onClick={() => go(step - 1)}>Back</button> : <span />}
+                <button type="button" className="gs-wizard-next" onClick={() => go(step + 1)}>{step === 2 ? "See my plan" : "Next"} <ArrowUpRight /></button>
+              </div>
+            )}
+            {wizard && step === 3 && (
+              <div className="gs-summary" tabIndex={-1}>
+                <span className="gs-label">Your answers</span>
+                <p>{answers.join(" · ")}</p>
+                <button type="button" onClick={() => go(0)}>Edit answers</button>
+              </div>
+            )}
           </form>
         </div>
 
