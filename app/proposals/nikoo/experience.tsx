@@ -1,4 +1,5 @@
 "use client";
+import Arrow from "./arrow";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -23,11 +24,14 @@ export default function Experience() {
     const el = root.current!;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
+    let lastProgress = -1;
     let currentX = 0, currentY = 0;
     const update = () => {
       frame = 0;
       const rect = el.getBoundingClientRect();
       const p = Math.max(0, Math.min(1, -rect.top / Math.max(1, el.offsetHeight - innerHeight)));
+      if (p === lastProgress && (rect.bottom <= 0 || rect.top >= innerHeight)) return;
+      lastProgress = p;
       progress.current = p;
       el.style.setProperty("--p", String(p));
       el.style.setProperty("--intro", String(1 - Math.min(1, p * 3)));
@@ -62,7 +66,7 @@ export default function Experience() {
       if (disposed || !canvas.current) return;
       let renderer: InstanceType<typeof THREE.WebGLRenderer>;
       try { renderer = new THREE.WebGLRenderer({ canvas: canvas.current, alpha: true, antialias: true }); } catch { return; }
-      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.6));
+      renderer.setPixelRatio(Math.min(devicePixelRatio, matchMedia("(pointer: coarse)").matches ? 1 : 1.5));
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(35, 1, .1, 100);
       camera.position.z = 10;
@@ -71,7 +75,7 @@ export default function Experience() {
       scene.add(new THREE.AmbientLight(0x66889a, 2));
       const light = new THREE.PointLight(0xb6f7f2, 80); light.position.set(3, 3, 4); scene.add(light);
       const warm = new THREE.PointLight(0xe7a47b, 55); warm.position.set(-4, -2, 3); scene.add(warm);
-      const geometry = new THREE.TorusGeometry(2.15, .024, 12, 180);
+      const geometry = new THREE.TorusGeometry(2.15, .024, 8, 96);
       const material = new THREE.MeshStandardMaterial({ color: 0xbee5e3, metalness: .8, roughness: .23 });
       const rings: InstanceType<typeof THREE.Mesh>[] = [];
       for (let i = 0; i < 5; i++) {
@@ -94,9 +98,16 @@ export default function Experience() {
       const resize = () => { const el = canvas.current; if (!el) return; const w = el.clientWidth, h = el.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); };
       const observer = new ResizeObserver(resize); observer.observe(canvas.current); resize();
       const reduce = matchMedia("(prefers-reduced-motion: reduce)");
-      let frame = 0, time = 0, previous = 0;
+      let frame = 0, time = 0, previous = 0, visible = false, lastPaint = 0;
+      const visibility = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible && !document.hidden && !frame) frame = requestAnimationFrame(render); });
+      const resume = () => { if (!document.hidden && visible && !frame) frame = requestAnimationFrame(render); };
+      document.addEventListener("visibilitychange", resume);
       const render = (now: number) => {
-        const active = root.current && root.current.getBoundingClientRect().bottom > 0 && !document.hidden;
+        frame = 0;
+        const active = visible && !document.hidden;
+        if (!active) return;
+        if (now - lastPaint < 1000 / 30) { frame = requestAnimationFrame(render); return; }
+        lastPaint = now;
         if (active) {
           if (!pausedRef.current && !reduce.matches) time += Math.min((now - previous) / 1000, .04);
           const p = progress.current;
@@ -111,8 +122,8 @@ export default function Experience() {
         }
         previous = now; frame = requestAnimationFrame(render);
       };
-      frame = requestAnimationFrame(render);
-      cleanup = () => { cancelAnimationFrame(frame); observer.disconnect(); geometry.dispose(); material.dispose(); dotsGeo.dispose(); dotsMat.dispose(); renderer.dispose(); };
+      if (root.current) visibility.observe(root.current);
+      cleanup = () => { cancelAnimationFrame(frame); visibility.disconnect(); document.removeEventListener("visibilitychange", resume); observer.disconnect(); geometry.dispose(); material.dispose(); dotsGeo.dispose(); dotsMat.dispose(); renderer.dispose(); };
     }).catch(() => {});
     return () => { disposed = true; cleanup(); };
   }, []);
@@ -135,7 +146,7 @@ export default function Experience() {
         <p className={s.eyebrow}><i /> FOR NIKOO. FROM SAMAN.</p>
         <h1>Your instinct.<br />Your impact.<br /><span>Your next.</span></h1>
         <p className={s.lead}>You know how to connect with young people.<br />Let’s build a business that connects with them, too.</p>
-        <Magnetic><button onClick={explore} className={s.cta} tabIndex={chapter ? -1 : 0}>Find your direction <span aria-hidden="true">↗</span></button></Magnetic>
+        <Magnetic><button onClick={explore} className={s.cta} tabIndex={chapter ? -1 : 0}>Find your direction <span aria-hidden="true"><Arrow direction="up-right"/></span></button></Magnetic>
       </div>
 
       <div className={s.universe} aria-hidden="true">
@@ -148,8 +159,8 @@ export default function Experience() {
           <span className={s.name}>Nikoo<span>NIK SUPPORTS / THE BEGINNING</span></span>
           <div className={s.cross}>+</div>
         </div>
-        <div className={s.orbitLabels}>{services.map((name, i) => <span key={name} style={{ "--i": i } as React.CSSProperties}><small>0{i+1}</small>{name}<b>↗</b></span>)}</div>
-        <span className={s.axis}>EXPERIENCE → POSSIBILITY</span>
+        <div className={s.orbitLabels}>{services.map((name, i) => <span key={name} style={{ "--i": i } as React.CSSProperties}><small>0{i+1}</small>{name}<b><Arrow direction="up-right"/></b></span>)}</div>
+        <span className={s.axis}>EXPERIENCE <Arrow direction="right"/> POSSIBILITY</span>
       </div>
 
       <section className={s.focus} aria-label="Proposed starting direction" aria-hidden={chapter === 0}>
